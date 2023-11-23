@@ -1,0 +1,107 @@
+{
+  "minecraft": {
+    "bot": {
+      "prefix": "!",
+      "messageFormat": "{username} » {message}",
+      "messageRepeatBypassLength": 24
+    },
+    "commands": {
+      "normal": true,
+      "soopy": true
+    },
+    "fragBot": {
+      "enabled": true,
+      "whitelist": false,
+      "whitelisted": [],
+      "blacklist": false,
+      "blacklisted": []
+    },
+    "guild": {
+      "guildExp": 50000
+    },
+    "API": {
+      "hypixelAPIkey": "{process.env.hypixelapi}",
+      "imgurAPIkey": "{process.env.imgurapi}"
+    },
+    "guildRequirements": {
+      "enabled": false,
+      "autoAccept": false,
+      "requirements": {
+        "bedwarsStars": 0,
+        "bedwarsStarsWithFKDR": 0,
+        "bedwarsFKDR": 0,
+
+        "skywarsStars": 0,
+        "skywarsStarsWithKDR": 0,
+        "skywarsKDR": 0,
+
+        "duelsWins": 0,
+        "duelsWinsWithWLR": 0,
+        "duelsWLR": 0,
+
+        "senitherWeight": 0,
+        "lilyWeight": 0,
+        "skyblockLevel": 0
+      }
+    },
+    "skyblockEventsNotifications": {
+      "enabled": false,
+      "notifiers": {
+        "BANK_INTEREST": true,
+        "DARK_AUCTION": true,
+        "ELECTION_BOOTH_OPENS": true,
+        "ELECTION_OVER": true,
+        "FALLEN_STAR_CULT": true,
+        "FEAR_MONGERER": true,
+        "JACOBS_CONTEST": true,
+        "JERRYS_WORKSHOP": true,
+        "NEW_YEAR_CELEBRATION": true,
+        "SEASON_OF_JERRY": true,
+        "SPOOKY_FESTIVAL": true,
+        "TRAVELING_ZOO": true
+      },
+      "customTime": {
+        "2": ["BANK_INTEREST", "DARK_AUCTION", "JACOBS_CONTEST"]
+      }
+    },
+    "hypixelUpdates": {
+      "enabled": true,
+      "hypixelNews": true,
+      "statusUpdates": true,
+      "skyblockVersion": true
+    }
+  },
+  "discord": {
+    "bot": {
+      "token": "{process.env.token}",
+      "serverID": "819229417796534283"
+    },
+    "channels": {
+      "guildChatChannel": "1110937815379882004",
+      "officerChannel": "1110981157409005629",
+      "loggingChannel": "1110937815379882004",
+      "debugMode": true,
+      "debugChannel": "1110981189172469821",
+      "allowedBots": ["BOT_USER_ID"]
+    },
+    "commands": {
+      "checkPerms": true,
+      "commandRole": "1057376971035783269",
+      "users": ["486155512568741900"]
+    },
+    "other": {
+      "messageMode": "minecraft",
+      "messageFormat": "{chatType} > {skin} {rank} {username} {guildRank}§f: {message}",
+      "filterMessages": true,
+      "joinMessage": true
+    }
+  },
+  "web": {
+    "enabled": false,
+    "port": 1439
+  },
+  "other": {
+    "autoUpdater": false,
+    "autoUpdaterInterval": 12
+  }
+}

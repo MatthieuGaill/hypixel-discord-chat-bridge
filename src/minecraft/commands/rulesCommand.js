@@ -7,7 +7,6 @@ class RulesCommand extends minecraftCommand {
     this.name = "rules";
     this.aliases = ["r"];
     this.description = "Give the rules";
-    ];
   }
 
   async onCommand(username, message) {
@@ -15,7 +14,6 @@ class RulesCommand extends minecraftCommand {
     } catch (error) {
       this.send(`/gc [ERROR] ${error}`);
     }
-  }
 }
 
 module.exports = RulesCommand;

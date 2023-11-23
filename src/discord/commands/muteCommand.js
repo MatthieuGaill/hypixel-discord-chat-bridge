@@ -37,8 +37,8 @@ module.exports = {
       .setAuthor({ name: "Mute" })
       .setDescription(`Successfully executed \`/g mute ${name} ${time}\``)
       .setFooter({
-        text: `by @duckysolucky | /help [command] for more information`,
-        iconURL: "https://imgur.com/tgwQJTX.png",
+        text: `/help [command] for more information`,
+        iconURL: "https://i.imgur.com/Fc2R9Z9.png",
       });
 
     await interaction.followUp({

@@ -237,9 +237,7 @@ class StateHandler extends eventHandler {
         .split(/ +/g)[0];
       await delay(1000);
       bot.chat(
-        `/gc ${replaceVariables(messages.guildJoinMessage, {
-          prefix: config.minecraft.bot.prefix,
-        })} | by @duckysolucky`
+        `/gc Welcome to the guild! Being verified on the guild discord is now mandatory for new members. Use /g discord`
       );
       return [
         this.minecraft.broadcastHeadedEmbed({

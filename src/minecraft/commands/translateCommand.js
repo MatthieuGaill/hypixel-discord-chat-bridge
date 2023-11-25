@@ -20,7 +20,7 @@ class TranslateCommand extends minecraftCommand {
     this.description = "Translate any sentence in english";
     this.options = [
       {
-        name: "question",
+        name: "sentence",
         description: "Sentence you want translated",
         required: true,
       },
@@ -28,12 +28,14 @@ class TranslateCommand extends minecraftCommand {
   }
 
   async onCommand(username, message) {
+    const arg = this.getArgs(message);
     try {
-      if (this.getArgs(message).length === 0) {
+      if (arg.length === 0) {
         // eslint-disable-next-line no-throw-literal
         throw "You must provide a sentence to translate.";
       }
-      let [response] = await translate.translate(text, targetLanguage);
+      const text = arg[0];
+      let [response] = await translate.translate(text, 'en');
       this.send(`/gc ${response}`);
       
     } catch (error) {

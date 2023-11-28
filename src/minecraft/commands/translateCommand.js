@@ -26,7 +26,7 @@ class TranslateCommand extends minecraftCommand {
       },
     ];
   }
-
+    
   async onCommand(username, message) {
     const arg = this.getArgs(message);
     try {
@@ -34,10 +34,13 @@ class TranslateCommand extends minecraftCommand {
         // eslint-disable-next-line no-throw-literal
         throw "You must provide a sentence to translate.";
       }
-      const text = arg[0];
+      const text = arg.join(' ');
+      if (text.includes('!')) {
+        throw "Please refrain from using !";
+      }
       let [response] = await translate.translate(text, 'en');
-      this.send(`/gc ${response}`);
-      
+      this.send(`/gc Translation: ${response}`);
+
     } catch (error) {
       this.send(`/gc [ERROR] ${error}`);
     }

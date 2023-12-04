@@ -39,15 +39,18 @@ class HypixelCommand extends minecraftCommand {
 
         return `${day}/${month}/${year}`;
       });
+
+   
+
+      const REVERSE_PQ_PREFIX = - 3.5;
+      const GROWTH_DIVIDES_2 =  2 / 2500;
       
       const karma = response?.player?.karma;
       const networkExp = response.player?.networkExp;
-      const networkLevel = ILeveling.getLevel(networkExp);
-      const percentagetoNext = ILeveling.getPercentageToNextLevel(networkExp);
-
+      const networkLevel = exp < 0 ? 1 : (1 + REVERSE_PQ_PREFIX + Math.sqrt(REVERSE_PQ_PREFIX*REVERSE_PQ_PREFIX + GROWTH_DIVIDES_2 * networkExp)).toFixed(2);
 
       this.send(
-        `/gc Matthipcas's Hypixel Level: ${networkLevel} (${percentagetoNext}% to next level) | Karma: ${karma} | First Login: ${hypixeltimes[0]} | Last Login: ${hypixeltimes[1]}`
+        `/gc ${username}'s Hypixel Level: ${networkLevel} | Karma: ${karma} | First Login: ${hypixeltimes[0]} | Last Login: ${hypixeltimes[1]}`
       );
     } catch (error) {
       this.send(`/gc [ERROR] ${error}`);
@@ -55,47 +58,5 @@ class HypixelCommand extends minecraftCommand {
   }
 }
 
-const ILeveling = {
-    EXP_FIELD: "networkExp",
-    LVL_FIELD: "networkLevel",
-
-    BASE: 10000,
-    GROWTH: 2500,
-
-    HALF_GROWTH: 0.5 * this.GROWTH,
-
-    REVERSE_PQ_PREFIX: -(this.BASE - 0.5 * this.GROWTH) / this.GROWTH,
-    REVERSE_CONST: this.REVERSE_PQ_PREFIX * this.REVERSE_PQ_PREFIX,
-    GROWTH_DIVIDES_2: 2 / this.GROWTH,
-
-    getLevel: function (exp) {
-        return exp < 0 ? 1 : Math.floor(1 + this.REVERSE_PQ_PREFIX + Math.sqrt(this.REVERSE_CONST + this.GROWTH_DIVIDES_2 * exp));
-    },
-
-    getExactLevel: function (exp) {
-        return this.getLevel(exp) + this.getPercentageToNextLevel(exp);
-    },
-
-    getExpFromLevelToNext: function (level) {
-        return level < 1 ? this.BASE : this.GROWTH * (level - 1) + this.BASE;
-    },
-
-    getTotalExpToLevel: function (level) {
-        let lv = Math.floor(level);
-        let x0 = this.getTotalExpToFullLevel(lv);
-        if (level === lv) return x0;
-        return (this.getTotalExpToFullLevel(lv + 1) - x0) * (level % 1) + x0;
-    },
-
-    getTotalExpToFullLevel: function (level) {
-        return (this.HALF_GROWTH * (level - 2) + this.BASE) * (level - 1);
-    },
-
-    getPercentageToNextLevel: function (exp) {
-        let lv = this.getLevel(exp);
-        let x0 = this.getTotalExpToLevel(lv);
-        return (exp - x0) / (this.getTotalExpToLevel(lv + 1) - x0);
-    }
-};
 
 module.exports = HypixelCommand;

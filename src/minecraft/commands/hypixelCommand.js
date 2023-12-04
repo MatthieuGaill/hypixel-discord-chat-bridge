@@ -30,17 +30,7 @@ class HypixelCommand extends minecraftCommand {
 
      
       const hypixeltimes = [response?.player?.firstLogin, response?.player?.lastLogin];
-      hypixeltimes.map(timestamp => {
-        const date = new Date(timestamp);
-        
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-
-        return `${day}/${month}/${year}`;
-      });
-
-   
+      const formattedDate = formatUnixTimestamps(hypixeltimes);
 
       const REVERSE_PQ_PREFIX = - 3.5;
       const GROWTH_DIVIDES_2 =  2 / 2500;
@@ -50,12 +40,20 @@ class HypixelCommand extends minecraftCommand {
       const networkLevel = networkExp < 0 ? 1 : (1 + REVERSE_PQ_PREFIX + Math.sqrt(REVERSE_PQ_PREFIX*REVERSE_PQ_PREFIX + GROWTH_DIVIDES_2 * networkExp)).toFixed(2);
 
       this.send(
-        `/gc ${username}'s Hypixel Level: ${networkLevel} | Karma: ${karma} | First Login: ${hypixeltimes[0]} | Last Login: ${hypixeltimes[1]}`
+        `/gc ${username}'s Hypixel Level: ${networkLevel} | Karma: ${karma} | First Login: ${formattedDate[0]} | Last Login: ${formattedDate[1]}`
       );
     } catch (error) {
       this.send(`/gc [ERROR] ${error}`);
     }
   }
+}
+
+function formatUnixTimestamps(unixTimestamps) {
+    return unixTimestamps.map(timestamp => {
+        const date = new Date(timestamp);
+        const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+        return formattedDate;
+    });
 }
 
 

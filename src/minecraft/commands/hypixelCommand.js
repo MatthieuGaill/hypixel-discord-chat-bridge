@@ -31,7 +31,7 @@ class HypixelCommand extends minecraftCommand {
      
       const hypixeltimes = [response?.player?.firstLogin, response?.player?.lastLogin];
       hypixeltimes.map(timestamp => {
-        const date = new Date(timestamp * 1000);
+        const date = new Date(timestamp);
         
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -47,7 +47,7 @@ class HypixelCommand extends minecraftCommand {
       
       const karma = response?.player?.karma;
       const networkExp = response.player?.networkExp;
-      const networkLevel = exp < 0 ? 1 : (1 + REVERSE_PQ_PREFIX + Math.sqrt(REVERSE_PQ_PREFIX*REVERSE_PQ_PREFIX + GROWTH_DIVIDES_2 * networkExp)).toFixed(2);
+      const networkLevel = networkExp < 0 ? 1 : (1 + REVERSE_PQ_PREFIX + Math.sqrt(REVERSE_PQ_PREFIX*REVERSE_PQ_PREFIX + GROWTH_DIVIDES_2 * networkExp)).toFixed(2);
 
       this.send(
         `/gc ${username}'s Hypixel Level: ${networkLevel} | Karma: ${karma} | First Login: ${hypixeltimes[0]} | Last Login: ${hypixeltimes[1]}`

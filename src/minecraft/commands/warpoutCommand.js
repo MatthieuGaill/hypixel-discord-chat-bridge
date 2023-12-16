@@ -25,7 +25,7 @@ class warpoutCommand extends minecraftCommand {
       }
       this.send("/lobby megawalls");
       await delay(250);
-      this.send("/play skyblock");
+      this.send("/play tkr");
 
       const warpoutListener = async (message) => {
         message = message.toString();
@@ -49,9 +49,11 @@ class warpoutCommand extends minecraftCommand {
           bot.removeListener("message", warpoutListener);
           this.isOnCooldown = false;
           this.send(`/gc ${user} warped out of the game! Disbanding party..`);
+          await delay(1500);
           this.send("/p disband");
 
           await delay(1500);
+          this.send("/lobby megawalls");
           this.send("\u00a7");
         } else if (message.includes(" cannot warp from Limbo")) {
           bot.removeListener("message", warpoutListener);
@@ -92,7 +94,9 @@ class warpoutCommand extends minecraftCommand {
           this.isOnCooldown = false;
 
           this.send(`/gc Couldn't find a player with that name!`);
-          this.send("/p disband");
+          //this.send("/p disband");
+          await delay(1500);
+          this.send("/lobby megawalls");
         } else if (message.includes("You cannot party yourself!")) {
           bot.removeListener("message", warpoutListener);
           this.isOnCooldown = false;

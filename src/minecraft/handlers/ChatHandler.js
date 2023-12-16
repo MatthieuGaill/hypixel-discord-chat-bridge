@@ -31,6 +31,9 @@ class StateHandler extends eventHandler {
     if (message.includes("✎ Mana") && message.includes("❤") && message.includes("/")) {
       return;
     }
+    if (message.includes("APPEARING OFFLINE") || message.includes("YOU ARE IN A PREGAME") || message.includes("HYPIXEL.NET") || message.includes("YOU MAY DRIVE")) {
+      return;
+    }
 
     if (config.discord.channels.debugMode === true) {
       this.minecraft.broadcastMessage({

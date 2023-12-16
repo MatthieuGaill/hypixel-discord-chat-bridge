@@ -7,7 +7,8 @@
     },
     "commands": {
       "normal": true,
-      "soopy": true
+      "soopy": true,
+      "staff_list": []
     },
     "fragBot": {
       "enabled": true,
@@ -101,7 +102,7 @@
     "port": 1439
   },
   "other": {
-    "autoUpdater": true,
+    "autoUpdater": false,
     "autoUpdaterInterval": 12
   }
 }

@@ -11,7 +11,7 @@ class MuteCommand extends minecraftCommand {
 
     this.name = "mute";
     this.aliases = ["m"];
-    this.description = "Muter player for a given duration";
+    this.description = "Mute player for a given duration (staff only)";
     this.options = [
       {
         name: "username",
@@ -43,10 +43,10 @@ class MuteCommand extends minecraftCommand {
       this.send(`/g mute ${username} ${time}`);
       await delay(1000);
       const warpoutListener = async (message) => {
-        if (message.includes("cannot mute someone")){
-          throw message;
-        }else{
+        if (message.includes("has muted")){
           this.send(`/gc ${username} has been muted for ${time}`);
+        }else{
+          throw message;
         }
       };
       bot.on("message", warpoutListener);

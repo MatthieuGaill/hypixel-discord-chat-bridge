@@ -55,8 +55,8 @@ module.exports = {
       .setAuthor({ name: "Blacklist" })
       .setDescription(`Successfully executed \`/ignore ${arg} ${name}\``)
       .setFooter({
-        text: `by @duckysolucky | /help [command] for more information`,
-        iconURL: "https://imgur.com/tgwQJTX.png",
+        text: `/help [command] for more information`,
+        iconURL: "https://i.imgur.com/Fc2R9Z9.png",
       });
 
     await interaction.followUp({

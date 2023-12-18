@@ -6,6 +6,7 @@ class RulesCommand extends minecraftCommand {
 
     this.name = "rules";
     this.aliases = ["r"];
+    this.options = [];
     this.description = "Give the rules";
   }
 

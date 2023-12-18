@@ -35,7 +35,7 @@ class UnmuteCommand extends minecraftCommand {
       const muted_username = arg[0];
       const muteListener = async (message) => {
            message = message.toString();
-           if (message.includes("has muted")){
+           if (message.includes("unmuted")){
              this.send(`/gc ${muted_username} has been unmuted`);
              await delay(2000);
            }else if (message.includes("cannot") || message.includes("find") || message.includes("Invalid")){

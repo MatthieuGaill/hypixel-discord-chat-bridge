@@ -23,11 +23,17 @@ class MuteCommand extends minecraftCommand {
         description: "time",
         required: true,
       },
+      {
+        name: "reason",
+        description: "reason",
+        required: false,
+      },
     ];
   }
 
   async onCommand(username, message) {
     try {
+      let isRemove = false;
       const uuid = await getUUID(username);
       const mod_list = config.minecraft.commands.mod_list;
       if (!mod_list.includes(uuid)){
@@ -35,26 +41,30 @@ class MuteCommand extends minecraftCommand {
       }
       const arg = this.getArgs(message);
       if (!arg[0] || !arg[1]) {
-        this.send("/gc Wrong Usage: !mute [name] [time]");
+        this.send("/gc Wrong Usage: !mute [name] [time] [reason (opt)]");
       }
       const muted_username = arg[0];
       const time = arg[1];
+      const reason = arg[2];
   
       const muteListener = async (message) => {
            message = message.toString();
            if (message.includes("has muted")){
-             this.send(`/gc ${muted_username} has been muted for: ${time}`);
-           }else if (message.includes("cannot")){
+             this.send(`/gc ${muted_username} has been muted for ${time}, ${reason}`);
+             await delay(2000);
+           }else if (message.includes("cannot") || message.includes("find") || message.includes("Invalid")){
               this.send(`/gc [ERROR] ${message}`);
+              bot.removeListener("message", muteListener);
+              isRemove = true;
            }
       };
       bot.on("message", muteListener);
       this.send(`/g mute ${muted_username} ${time}`);
-      await delay(4000);     
-      bot.removeListener("message", muteListener);    
-
+      await delay(4000);
+      if (isRemove === false){
+        bot.removeListener("message", muteListener);    
+      }
     } catch (error) {
-      console.log(error);
       this.send(`/gc [ERROR] ${error}`);
     }
   }

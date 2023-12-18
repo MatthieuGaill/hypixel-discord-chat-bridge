@@ -57,7 +57,7 @@ module.exports = {
         )
         .setFooter({
           text: "/help [command] for more information",
-          iconURL: "https://imgur.com/a/yR74ADY",
+          iconURL: "https://imgur.com/Fc2R9Z9",
         });
 
       await interaction.followUp({ embeds: [helpMenu] });
@@ -90,7 +90,7 @@ module.exports = {
         .setDescription(description + "\n")
         .setFooter({
           text: "() = required, [] = optional",
-          iconURL: "https://imgur.com/a/yR74ADY",
+          iconURL: "https://imgur.com/Fc2R9Z9",
         });
 
       await interaction.followUp({ embeds: [embed] });

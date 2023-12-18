@@ -7,7 +7,13 @@ class warpoutCommand extends minecraftCommand {
     this.name = "warpout";
     this.aliases = ["warp"];
     this.description = "Warp player out of the game";
-    this.options = [];
+    this.options = [
+      {
+        name: "username",
+        description: "Minecraft username",
+        required: true,
+      },
+    ];
     this.isOnCooldown = false;
   }
   async onCommand(username, message) {

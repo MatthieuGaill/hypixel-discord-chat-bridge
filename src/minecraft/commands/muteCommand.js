@@ -37,19 +37,22 @@ class MuteCommand extends minecraftCommand {
       if (!arg[0] || !arg[1]) {
         this.send("/gc Wrong Usage: !mute [name] [time]");
       }
-      username = arg[0];
+      const muted_username = arg[0];
       const time = arg[1];
-      
-      this.send(`/g mute ${username} ${time}`);
-      await delay(1000);
-      const warpoutListener = async (message) => {
-        if (message.includes("has muted")){
-          this.send(`/gc ${username} has been muted for ${time}`);
-        }else{
-          throw message;
-        }
+  
+      const muteListener = async (message) => {
+           message = message.toString();
+           if (message.includes("has muted")){
+             this.send(`/gc ${muted_username} has been muted for: ${time}`);
+           }else if (message.includes("cannot")){
+              this.send(`/gc [ERROR] ${message}`);
+           }
       };
-      bot.on("message", warpoutListener);
+      bot.on("message", muteListener);
+      this.send(`/g mute ${muted_username} ${time}`);
+      await delay(4000);     
+      bot.removeListener("message", muteListener);    
+
     } catch (error) {
       console.log(error);
       this.send(`/gc [ERROR] ${error}`);

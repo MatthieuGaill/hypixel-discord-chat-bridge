@@ -29,8 +29,8 @@ class MuteCommand extends minecraftCommand {
   async onCommand(username, message) {
     try {
       const uuid = await getUUID(username);
-      const staff_list = config.minecraft.commands.staff_list;
-      if (!staff_list.includes(uuid)){
+      const mod_list = config.minecraft.commands.mod_list;
+      if (!mod_list.includes(uuid)){
         throw 'No permission';
       }
       const arg = this.getArgs(message);
@@ -42,7 +42,14 @@ class MuteCommand extends minecraftCommand {
       
       this.send(`/g mute ${username} ${time}`);
       await delay(1000);
-      this.send(`/gc ${username} has been muted for ${time}`);
+      const warpoutListener = async (message) => {
+        if (message.includes("cannot mute someone")){
+          throw message;
+        }else{
+          this.send(`/gc ${username} has been muted for ${time}`);
+        }
+      };
+      bot.on("message", warpoutListener);
     } catch (error) {
       console.log(error);
       this.send(`/gc [ERROR] ${error}`);

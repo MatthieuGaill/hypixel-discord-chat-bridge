@@ -36,28 +36,34 @@ module.exports = {
         throw new HypixelDiscordChatBridgeError(err);
         return;
       }
+      const embed = new EmbedBuilder();
     
       if (row) {
         key_value = row.value;
-        console.log(`Value for key '${keyToRetrieve}': ${retrievedValue}`);
-      } else {
-        throw new HypixelDiscordChatBridgeError(`No value found for code ${code_key}`);
+        embed
+        .setColor(12745742)
+        .setAuthor({ name: "Prize claimed!" })
+        .setDescription(`Congratulations <@${user.id}> you won a **${key_value}**`)
+        .setFooter({
+          text: ' ',
+          iconURL: "https://i.imgur.com/Fc2R9Z9.png",});
+
+      } else {      
+        embed
+        .setColor(10038562)
+        .setAuthor({ name: "Invalid Code!" })
+        .setDescription(`**${code_key}** is not a valid code (anymore)!`)
+        .setFooter({
+          text: ' ',
+          iconURL: "https://i.imgur.com/Fc2R9Z9.png",});
       }
-    
-      // Close the database connection when done
+
+      
+      interaction.followUp({embeds: [embed],});
       db.close();
     });
     
     db.run('DELETE FROM ticketdata WHERE key = ?', [code_key]);
-    
-    const embed = new EmbedBuilder()
-      .setColor(12745742)
-      .setAuthor({ name: "Congratulations!" })
-      .setDescription(`You won a ${key_value}`)
-      .setFooter({
-        text: ' ',
-        iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-      });
-      await interaction.followUp({embeds: [embed],});
+
   }
 };

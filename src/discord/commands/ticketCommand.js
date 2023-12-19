@@ -55,7 +55,7 @@ module.exports = {
       await interaction.followUp({embeds: [embed],});
       
     } else if (action === "remove"){
-      db.run('DELETE FROM ticketdata WHERE key = ?', [key]);
+      db.run('DELETE FROM ticketdata WHERE key = ?', [code_key]);
       const embed = new EmbedBuilder()
       .setColor(5763719)
       .setAuthor({ name: "Ticket removed" })
@@ -65,6 +65,7 @@ module.exports = {
         iconURL: "https://i.imgur.com/Fc2R9Z9.png",
       });
       await interaction.followUp({embeds: [embed],});
+
       
     } else if (action === "list"){
       const dataDictionary = {};
@@ -74,13 +75,10 @@ module.exports = {
           console.error(err);
           return;
         }
-        
         rows.forEach((row) => { dataDictionary[row.key] = row.value;});
-        
         const verticalList = Object.entries(dataDictionary)
          .map(([key, value]) => `${key}: ${value}`)
-         .join('\n');
-
+         .join('\n'); 
         const embed = new EmbedBuilder()
           .setColor(5763719)
           .setAuthor({ name: "Code list" })
@@ -91,7 +89,7 @@ module.exports = {
         });
         db.close();
         interaction.followUp({embeds: [embed],});
-        
+
       });
 
     } else {
@@ -100,3 +98,5 @@ module.exports = {
 
   },
 };
+
+  

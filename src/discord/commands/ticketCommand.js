@@ -82,7 +82,7 @@ module.exports = {
           return;
         }
         rows.forEach((row) => { dataDictionary[row.key] = row.value;});
-        const verticalList = Object.entries(dataDictionary)
+        let verticalList = Object.entries(dataDictionary)
          .map(([key, value]) => `**${key}** :  ${value}`)
          .join('\n'); 
         if (!verticalList){

@@ -9,7 +9,7 @@ module.exports = {
   options: [
     {
       name: "action",
-      description: "action to run",
+      description: "action to run: (add/remove/list)",
       type: 3,
       required: true,
     },
@@ -17,13 +17,13 @@ module.exports = {
       name: "code",
       description: "code",
       type: 3,
-      required: true,
+      required: false,
     },
     {
       name: "value",
       description: "value",
       type: 3,
-      required: true,
+      required: false,
     },
   ],
 
@@ -40,11 +40,14 @@ module.exports = {
 
     const [action, code_key, code_value] = [interaction.options.getString("action"), interaction.options.getString("code"), interaction.options.getString("value")];
 
-    if (action === "create" || action === "Create"){
-      db.run('INSERT OR REPLACE INTO ticketdata (key, value) VALUES (?, ?)', [code_key, code_value]);
+    if (action === "add" || action === "Add"){
+      if (code_key === null || code_value === null){
+        throw new HypixelDiscordChatBridgeError("You must specify a code & value with add");
+      }
       
+      db.run('INSERT OR REPLACE INTO ticketdata (key, value) VALUES (?, ?)', [code_key, code_value]);
       const embed = new EmbedBuilder()
-      .setColor(5763719)
+      .setColor(2067276)
       .setAuthor({ name: "Ticket created" })
       .setDescription(`Successfully created code ${code_key} with the value ${code_value}`)
       .setFooter({
@@ -55,9 +58,12 @@ module.exports = {
       await interaction.followUp({embeds: [embed],});
       
     } else if (action === "remove"){
+      if (code_key === null){
+        throw new HypixelDiscordChatBridgeError("You must specify a code (to remove) with remove");
+      }
       db.run('DELETE FROM ticketdata WHERE key = ?', [code_key]);
       const embed = new EmbedBuilder()
-      .setColor(5763719)
+      .setColor(15105570)
       .setAuthor({ name: "Ticket removed" })
       .setDescription(`Successfully removed code ${code_key}`)
       .setFooter({
@@ -79,8 +85,11 @@ module.exports = {
         const verticalList = Object.entries(dataDictionary)
          .map(([key, value]) => `${key}: ${value}`)
          .join('\n'); 
+        if (!verticalList){
+          verticalList = "no codes registered yet!";
+        }
         const embed = new EmbedBuilder()
-          .setColor(5763719)
+          .setColor(0)
           .setAuthor({ name: "Code list" })
           .setDescription(verticalList)
           .setFooter({

@@ -51,6 +51,9 @@ class warpoutCommand extends minecraftCommand {
         } else if (message.includes(" joined the party.")) {
           this.send(`/gc ${user} joined the party! Warping them out of the game..`);
           this.send("/p warp");
+        } else if (message.includes("again to confirm")) {
+          await delay(1000);
+          this.send("/p warp");
         } else if (message.includes("warped to your server")) {
           bot.removeListener("message", warpoutListener);
           this.isOnCooldown = false;
@@ -125,6 +128,8 @@ class warpoutCommand extends minecraftCommand {
         if (this.isOnCooldown === true) {
           this.send("/gc Party timed out");
           this.send("/p disband");
+          await delay(1500);
+          this.send("/lobby megawalls");
           this.send("\u00a7");
 
           this.isOnCooldown = false;

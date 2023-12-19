@@ -30,8 +30,8 @@ module.exports = {
         .setAuthor({ name: "An Error has occurred" })
         .setDescription(`${errrorMessage}\`\`\`${error}\`\`\``)
         .setFooter({
-          text: `by @duckysolucky | /help [command] for more information`,
-          iconURL: "https://imgur.com/tgwQJTX.png",
+          text: `/help [command] for more information`,
+          iconURL: "https://imgur.com/Fc2R9Z9",
         });
 
       await interaction.editReply({ embeds: [errorEmbed] });

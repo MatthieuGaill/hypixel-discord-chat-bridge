@@ -49,7 +49,7 @@ module.exports = {
       const embed = new EmbedBuilder()
       .setColor(2067276)
       .setAuthor({ name: "Ticket created" })
-      .setDescription(`Successfully created code ${code_key} with the value ${code_value}`)
+      .setDescription(`Successfully created code **${code_key}** with the value **${code_value}**`)
       .setFooter({
         text: ' ',
         iconURL: "https://i.imgur.com/Fc2R9Z9.png",
@@ -65,7 +65,7 @@ module.exports = {
       const embed = new EmbedBuilder()
       .setColor(15105570)
       .setAuthor({ name: "Ticket removed" })
-      .setDescription(`Successfully removed code ${code_key}`)
+      .setDescription(`Successfully removed code **${code_key}**`)
       .setFooter({
         text: ' ',
         iconURL: "https://i.imgur.com/Fc2R9Z9.png",
@@ -83,13 +83,13 @@ module.exports = {
         }
         rows.forEach((row) => { dataDictionary[row.key] = row.value;});
         const verticalList = Object.entries(dataDictionary)
-         .map(([key, value]) => `${key}: ${value}`)
+         .map(([key, value]) => `**${key}** :  ${value}`)
          .join('\n'); 
         if (!verticalList){
           verticalList = "no codes registered yet!";
         }
         const embed = new EmbedBuilder()
-          .setColor(0)
+          .setColor(16777215)
           .setAuthor({ name: "Code list" })
           .setDescription(verticalList)
           .setFooter({
@@ -102,7 +102,7 @@ module.exports = {
       });
 
     } else {
-      throw new HypixelDiscordChatBridgeError("Wrong usage: /ticket (create/remove/list)");
+      throw new HypixelDiscordChatBridgeError("Wrong usage: /ticket (add/remove/list) [code] [value]");
     }
 
   },

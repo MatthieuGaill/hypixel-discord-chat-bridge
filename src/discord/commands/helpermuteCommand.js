@@ -12,12 +12,6 @@ module.exports = {
       type: 3,
       required: true,
     },
-    {
-      name: "time",
-      description: "Time",
-      type: 3,
-      required: true,
-    },
   ],
 
   execute: async (interaction) => {
@@ -29,7 +23,7 @@ module.exports = {
       throw new HypixelDiscordChatBridgeError("You do not have permission to use this command.");
     }
 
-    const [name, time] = [interaction.options.getString("name"), interaction.options.getString("time")];
+    const name = interaction.options.getString("name");
     bot.chat(`/g mute ${name} 1h`);
 
     const embed = new EmbedBuilder()

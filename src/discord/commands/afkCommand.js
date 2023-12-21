@@ -8,13 +8,15 @@ import {
   ButtonStyle,
   time,
 } from "discord.js";
-import { Command } from "src/types/commands";
-import logger from "utils/log";
 
 module.exports = {
   name: "afk",
   description: "Request afk form",
-  disabled: false,M§"username",
+  disabled: false,
+  debug: false,
+  options: [
+    {
+      name: "username",
       description: "In-Game Username",
       required: true,
       type: 3,
@@ -24,7 +26,7 @@ module.exports = {
       description: "How long you'll be away",
       required: true,
       type: 3,
-    },cfvb 
+    },
     {
       name: "reason",
       description: "Reason for being away",
@@ -33,7 +35,7 @@ module.exports = {
     },
   ],
   permissions: [],
-  execute: async (
+  callback: async (
     client: Client,
     interaction: ChatInputCommandInteraction,
   ) => {
@@ -110,7 +112,7 @@ module.exports = {
         content: `Error occured: ${e}`,
         components: [],
       });
-      logger.error(e);
+      
     }
   },
-} satisfies Command;
+}

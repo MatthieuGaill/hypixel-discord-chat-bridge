@@ -42,7 +42,7 @@ class KickCommand extends minecraftCommand {
   
       const muteListener = async (message) => {
            message = message.toString();
-           if (message.includes("kicked")){
+           if (message.includes("was kicked")){
              this.send(`/gc ${kick_username} has been kicked from the guild for ${reason}`);
              await delay(2000);
            }else if (message.includes("cannot kick") || message.includes("find") || message.includes("is not") ||  message.includes("Invalid"))){

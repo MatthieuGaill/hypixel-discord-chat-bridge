@@ -29,21 +29,23 @@ module.exports = (player, profile) => {
 
     const MASTER_MODE_FLOORS = {};
 
-    for (let i = 1; i <= dungeons?.dungeon_types.master_catacombs.highest_tier_completed; i++) {
-      MASTER_MODE_FLOORS[`floor_${i}`] = {
-        completions: MASTER_CATACOMBS?.tier_completions[i] ?? 0,
-        best_score: {
-          score: MASTER_CATACOMBS?.best_score[i] ?? 0,
-          name: getScoreName(MASTER_CATACOMBS?.best_score[i] ?? 0),
-        },
-        fastest: MASTER_CATACOMBS?.fastest_time[i] ?? 0,
-        fastest_s: MASTER_CATACOMBS?.fastest_time_s[i] ?? 0,
-        fastest_s_plus: MASTER_CATACOMBS?.fastest_time_s_plus?.[i] || 0,
-        mobs_killed: MASTER_CATACOMBS?.mobs_killed[i] ?? 0,
-      };
+    if (MASTER_CATACOMBS){
+      for (let i = 1; i <= dungeons?.dungeon_types.master_catacombs.highest_tier_completed; i++) {
+        MASTER_MODE_FLOORS[`floor_${i}`] = {
+          completions: MASTER_CATACOMBS?.tier_completions[i] ?? 0,
+          best_score: {
+            score: MASTER_CATACOMBS?.best_score[i] ?? 0,
+            name: getScoreName(MASTER_CATACOMBS?.best_score[i] ?? 0),
+          },
+          fastest: MASTER_CATACOMBS?.fastest_time[i] ?? 0,
+          fastest_s: MASTER_CATACOMBS?.fastest_time_s[i] ?? 0,
+          fastest_s_plus: MASTER_CATACOMBS?.fastest_time_s_plus?.[i] || 0,
+          mobs_killed: MASTER_CATACOMBS?.mobs_killed[i] ?? 0,
+        };
+      }
     }
 
-    const HIGEHST_TIER_COMPLETED = MASTER_CATACOMBS?.highest_tier_completed
+    const HIGHEST_TIER_COMPLETED = MASTER_CATACOMBS?.highest_tier_completed
       ? `M${MASTER_CATACOMBS?.highest_tier_completed}`
       : catacombs?.highest_tier_completed
       ? `F${catacombs?.highest_tier_completed}`
@@ -79,7 +81,7 @@ module.exports = (player, profile) => {
       catacombs: {
         skill: calcSkill("dungeoneering", dungeons?.dungeon_types.catacombs.experience || 0),
         perks,
-        HIGEHST_TIER_COMPLETED,
+        HIGHEST_TIER_COMPLETED,
         floors,
         MASTER_MODE_FLOORS,
       },

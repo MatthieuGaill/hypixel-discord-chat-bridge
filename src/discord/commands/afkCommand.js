@@ -8,6 +8,12 @@ import {
   ButtonStyle,
   time,
 } from "discord.js";
+const sqlite3 = require('sqlite3');
+const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
+const { AfkCollections } = require('discord-afk-js');
+const moment = require('moment');
+
+const afk = new AfkCollections();
 
 module.exports = {
   name: "afk",
@@ -22,8 +28,8 @@ module.exports = {
       type: 3,
     },
     {
-      name: "duration",
-      description: "How long you'll be away",
+      name: "date",
+      description: "End of afk date in DD/MM/YYYY format!",
       required: true,
       type: 3,
     },
@@ -39,15 +45,21 @@ module.exports = {
     client: Client,
     interaction: ChatInputCommandInteraction,
   ) => {
+    const discord_user = interaction.member;
     const user = interaction.options.getString("username");
-    const duration = interaction.options.getString("duration");
+    const date = interaction.options.getString("date");
     const reason = interaction.options.getString("reason");
+    const dateFormatRegex = /^(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/\d{4}$/;
 
-    const fields: APIEmbedField[] = [
-      { name: "Username", value: user! },
-      { name: "Duration", value: duration!, inline: true },
-      { name: "Reason", value: reason! },
-    ];
+    if (!dateFormatRegex.test(date);){
+      throw new HypixelDiscordChatBridgeError(`Wrong date format! Use DD/MM/YYYY. (for example today is <d:${Date.now()}> )`);
+    }
+  
+    // const fields: APIEmbedField[] = [
+    //   { name: "Username", value: user! },
+    //   { name: "Date", value: date!, inline: true },
+    //   { name: "Reason", value: reason! },
+    // ];
 
     const embed = new EmbedBuilder()
       .setColor("Gold")
@@ -76,8 +88,17 @@ module.exports = {
       components: [{ type: 1, components: [approve, deny] }],
     });
 
+
+
+    
     try {
       // TODO: Setup filter to prevent non-Staff from approving/denying applications
+      if (!["629735859653967912"].includes(discord_user.id)){
+        return;
+      }
+      
+      const db = new sqlite3.Database('database.sqlite');
+      db.run('CREATE TABLE IF NOT EXISTS afkdata (key TEXT PRIMARY KEY, value TEXT)');
       const action = await response.awaitMessageComponent();
 
       if (action.customId === "approved") {
@@ -93,6 +114,7 @@ module.exports = {
           ],
           components: [],
         });
+        db.run('INSERT OR REPLACE INTO afkdata (key, date, reason) VALUES (?, ?, ?)', [user_discord.id, date, reason]);
       } else if (action.customId === "denied") {
         await action.update({
           embeds: [
@@ -112,7 +134,7 @@ module.exports = {
         content: `Error occured: ${e}`,
         components: [],
       });
-      
     }
+    
   },
 }

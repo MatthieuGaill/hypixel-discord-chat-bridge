@@ -52,8 +52,8 @@ module.exports = {
       .setTitle("Top 10 Guild Members")
       .setDescription(description)
       .setFooter({
-        text: "by @duckysolucky | /help [command] for more information",
-        iconURL: "https://imgur.com/tgwQJTX.png",
+        text: "/help [command] for more information",
+        iconURL: "https://imgur.com/Fc2R9Z9",
       });
 
     return await interaction.followUp({ embeds: [embed] });

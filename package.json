@@ -56,7 +56,6 @@
     //"@google-cloud/translate": "^8.0.2",
     "deepl-node": "^1.11.0",
     "sqlite3": "^5.1.6",
-    "discord-afk-js": "^1.5.0"
     
   },
   "devDependencies": {

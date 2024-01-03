@@ -60,10 +60,11 @@ module.exports = {
 
       
       interaction.followUp({embeds: [embed],});
-      db.close();
     });
     
     db.run('DELETE FROM ticketdata WHERE key = ?', [code_key]);
+    // console.log("----------------------------")
+    // console.log(`${code_key} removed`)
 
   }
 };

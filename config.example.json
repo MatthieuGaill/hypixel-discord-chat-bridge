@@ -8,8 +8,18 @@
     "commands": {
       "normal": true,
       "soopy": true,
-      "mod_list": [],
-      "admin_list": []
+      "mod_list": [
+        "a608e10c911648a5956590a9bb0bec93",
+        "3491fcab26dc4b7fa1525dd445ba8f62",
+        "279abb0f86f343f9a10e881ff6959b78",
+        "b0848e9c82d44d68a810df01a655fe97",
+        "589ae94cdf3d4f468adcb5436793eec0"
+      ],
+      "admin_list": [
+        "a608e10c911648a5956590a9bb0bec93",
+        "279abb0f86f343f9a10e881ff6959b78",
+        "589ae94cdf3d4f468adcb5436793eec0"
+      ]
     },
     "fragBot": {
       "enabled": true,
@@ -32,22 +42,19 @@
         "bedwarsStars": 0,
         "bedwarsStarsWithFKDR": 0,
         "bedwarsFKDR": 0,
-
         "skywarsStars": 0,
         "skywarsStarsWithKDR": 0,
         "skywarsKDR": 0,
-
         "duelsWins": 0,
         "duelsWinsWithWLR": 0,
         "duelsWLR": 0,
-
         "senitherWeight": 0,
         "lilyWeight": 0,
         "skyblockLevel": 0
       }
     },
     "skyblockEventsNotifications": {
-      "enabled": true,
+      "enabled": false,
       "notifiers": {
         "BANK_INTEREST": true,
         "DARK_AUCTION": true,
@@ -63,7 +70,11 @@
         "TRAVELING_ZOO": true
       },
       "customTime": {
-        "2": ["BANK_INTEREST", "DARK_AUCTION", "JACOBS_CONTEST"]
+        "2": [
+          "BANK_INTEREST",
+          "DARK_AUCTION",
+          "JACOBS_CONTEST"
+        ]
       }
     },
     "hypixelUpdates": {
@@ -75,24 +86,29 @@
   },
   "discord": {
     "bot": {
-      "token": "DISCORD_BOT_TOKEN",
-      "serverID": "DISCORD_SERVER_ID"
+      
+      "token": "BOT_TOKEN",
+      "serverID": "819229417796534283"
     },
     "channels": {
-      "guildChatChannel": "GUILD_CHAT_CHANNEL_ID",
-      "officerChannel": "OFFICER_CHANNEL_ID",
-      "loggingChannel": "LOGGING_CHANNEL_ID",
+      "guildChatChannel": "1110937815379882004",
+      "officerChannel": "1110981157409005629",
+      "loggingChannel": "1110937815379882004",
       "debugMode": true,
-      "debugChannel": "DEBUG_CHANNEL_ID",
-      "allowedBots": ["BOT_USER_ID"]
+      "debugChannel": "1110981189172469821",
+      "allowedBots": [
+        "1109873692344848555"
+      ]
     },
     "commands": {
       "checkPerms": true,
-      "commandRole": "COMMAND_ROLE_ID",
-      "users": ["486155512568741900"]
+      "commandRole": "1057376971035783269",
+      "users": [
+        "486155512568741900"
+      ]
     },
     "other": {
-      "messageMode": "minecraft",
+      "messageMode": "bot",
       "messageFormat": "{chatType} > {skin} {rank} {username} {guildRank}§f: {message}",
       "filterMessages": true,
       "joinMessage": true

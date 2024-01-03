@@ -1,4 +1,4 @@
-import {
+const {
   Client,
   ApplicationCommandOptionType,
   ChatInputCommandInteraction,
@@ -6,14 +6,10 @@ import {
   APIEmbedField,
   ButtonBuilder,
   ButtonStyle,
-  time,
-} from "discord.js";
+} = require ("discord.js");
 const sqlite3 = require('sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
-const { AfkCollections } = require('discord-afk-js');
-const moment = require('moment');
 
-const afk = new AfkCollections();
 
 module.exports = {
   name: "afk",
@@ -40,26 +36,45 @@ module.exports = {
       type: 3,
     },
   ],
-  permissions: [],
-  callback: async (
-    client: Client,
-    interaction: ChatInputCommandInteraction,
-  ) => {
+  
+
+  execute: async (interaction) => {
+    
     const discord_user = interaction.member;
     const user = interaction.options.getString("username");
-    const date = interaction.options.getString("date");
+    let date = interaction.options.getString("date");
     const reason = interaction.options.getString("reason");
-    const dateFormatRegex = /^(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/\d{4}$/;
 
-    if (!dateFormatRegex.test(date);){
-      throw new HypixelDiscordChatBridgeError(`Wrong date format! Use DD/MM/YYYY. (for example today is <d:${Date.now()}> )`);
+    const dateFormatRegex = /^(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    try{
+    if (!dateFormatRegex.test(date)){
+      throw `Wrong date format! Use DD/MM/YYYY. (for example today is <t:${Math.floor(Date.now()/1000)}:d> )`;
+      
     }
-  
-    // const fields: APIEmbedField[] = [
-    //   { name: "Username", value: user! },
-    //   { name: "Date", value: date!, inline: true },
-    //   { name: "Reason", value: reason! },
-    // ];
+    
+    const fields = [
+      { name: "Username", value: user !== undefined ? user : "N/A" },
+      { name: "Date", value: date !== undefined ? date : "N/A", inline: true },
+      { name: "Reason", value: reason !== undefined ? reason : "N/A" },
+    ];
+
+    date = convertDateFormatToTimestamp(date);
+    daysDiff = DateChecking(date);
+    const hasCaptain = interaction.member.roles.cache.some(role => role.id === '819233568374390815');
+    const hasLieutenant = interaction.member.roles.cache.some(role => role.id === '819233569401995294');
+    const hasSergeant = interaction.member.roles.cache.some(role => role.id === '819233569864024067');
+
+    if (daysDiff <= 0){
+      throw `You cannot put a date in the past! (*you put <t:${date/1000}:d>*)`;
+    } else if(hasCaptain && daysDiff > 93){
+      throw `<@&819233568374390815> rank cannot make afk requests longer than 3 months! (*But you can renew them*)`;
+    } else if(hasLieutenant && daysDiff > 62){
+      throw `<@&819233569401995294> rank cannot make afk requests longer than 3 months! (*But you can renew them*)`;
+    } else if(hasSergeant && daysDiff > 31){
+      throw `<@&819233569864024067> rank cannot make afk requests longer than 3 months! (*But you can renew them*)`;
+    } else if (daysDiff > 15.5){
+      throw `<@&819233714558730311> rank cannot make afk requests longer than 3 months! (*But you can renew them*)`;
+    }
 
     const embed = new EmbedBuilder()
       .setColor("Gold")
@@ -68,7 +83,7 @@ module.exports = {
       .setThumbnail(interaction.user.avatarURL())
       .setTimestamp(interaction.createdAt)
       .setFooter({
-        iconURL: interaction.user.avatarURL()!,
+        iconURL: interaction.user.avatarURL(),
         text: "Requested at",
       });
 
@@ -83,38 +98,33 @@ module.exports = {
       .setEmoji("✖")
       .setStyle(ButtonStyle.Danger);
 
-    const response = await interaction.reply({
+    const response = await interaction.editReply({
       embeds: [embed],
       components: [{ type: 1, components: [approve, deny] }],
     });
 
-
-
-    
-    try {
-      // TODO: Setup filter to prevent non-Staff from approving/denying applications
-      if (!["629735859653967912"].includes(discord_user.id)){
-        return;
-      }
       
-      const db = new sqlite3.Database('database.sqlite');
-      db.run('CREATE TABLE IF NOT EXISTS afkdata (key TEXT PRIMARY KEY, value TEXT)');
-      const action = await response.awaitMessageComponent();
+      const db = new sqlite3.Database('afkdatabase.sqlite');
+      db.run('CREATE TABLE IF NOT EXISTS afkdata (key TEXT PRIMARY KEY, user TEXT NOT NULL, date DATETIME, reason TEXT)');
+      const roleFilter = (i) => i.member.roles.cache.has("1109878759789695058");
+
+      const action = await response.awaitMessageComponent({filter: roleFilter});
 
       if (action.customId === "approved") {
+        db.run('INSERT OR REPLACE INTO afkdata (key, user, date, reason) VALUES (?, ?, ?, ?)', [response.id, discord_user.id, date, reason]);
         await action.update({
           embeds: [
             embed
               .setColor("Green")
               .setFooter({
                 text: `Approved at`,
-                iconURL: action.user.avatarURL()!,
+                iconURL: action.user.avatarURL(),
               })
               .setTimestamp(Date.now()),
           ],
           components: [],
         });
-        db.run('INSERT OR REPLACE INTO afkdata (key, date, reason) VALUES (?, ?, ?)', [user_discord.id, date, reason]);
+        
       } else if (action.customId === "denied") {
         await action.update({
           embeds: [
@@ -122,19 +132,42 @@ module.exports = {
               .setColor("Red")
               .setFooter({
                 text: `Denied at`,
-                iconURL: action.user.avatarURL()!,
+                iconURL: action.user.avatarURL(),
               })
               .setTimestamp(Date.now()),
           ],
           components: [],
         });
+        await interaction.editReply({
+          content: `<@${discord_user.id}> you request was denied! Read the **pinned** message **carefully** before making a request.`,
+          components: [],
+        });
       }
+
+
     } catch (e) {
       await interaction.editReply({
-        content: `Error occured: ${e}`,
+        content: `**ERROR** <@${discord_user.id}> ${e}`,
         components: [],
       });
+      //throw new HypixelDiscordChatBridgeError(`${e}`);
     }
     
   },
+}
+
+
+function convertDateFormatToTimestamp(dateString) {
+  const [day, month, year] = dateString.split('/');
+  const dateObject = new Date(`${year}-${month}-${day}`);
+  const timestamp = dateObject.getTime();
+
+  return timestamp;
+}
+
+function DateChecking(date){
+  const date_now = new Date();
+  const daysDiff = (date - date_now.getTime())/ (1000 * 60 * 60 * 24);
+
+  return daysDiff
 }

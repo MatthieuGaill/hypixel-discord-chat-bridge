@@ -3,6 +3,8 @@ const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js")
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 
+
+
 module.exports = {
   name: "ticket",
   description: "Voucher tool",
@@ -26,7 +28,7 @@ module.exports = {
       required: false,
     },
   ],
-
+  
   execute: async (interaction) => {
     const user = interaction.member;
     if (
@@ -74,38 +76,49 @@ module.exports = {
 
       
     } else if (action === "list"){
-      const dataDictionary = {};
-      
-      db.all('SELECT * FROM ticketdata', [], (err, rows) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        rows.forEach((row) => { dataDictionary[row.key] = row.value;});
-        let verticalList = Object.entries(dataDictionary)
-         .map(([key, value]) => `**${key}** :  ${value}`)
-         .join('\n'); 
-        if (!verticalList){
-          verticalList = "no codes registered yet!";
-        }
-        const embed = new EmbedBuilder()
-          .setColor(16777215)
-          .setAuthor({ name: "Code list" })
-          .setDescription(verticalList)
-          .setFooter({
-            text: ' ',
-            iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-        });
-        db.close();
-        interaction.followUp({embeds: [embed],});
-
-      });
-
+      const embed = await getList(db);
+    
+      await interaction.followUp( {embeds: [embed]});
+      //await interaction.editReply("test");
     } else {
       throw new HypixelDiscordChatBridgeError("Wrong usage: /ticket (add/remove/list) [code] [value]");
     }
 
   },
+
 };
+
+  
+async function getList(db){
+  const dataDictionary = {};
+  return new Promise((resolve, reject) => {
+    db.all('SELECT * FROM ticketdata', [], (err, rows) => {
+      if (err) {
+        //console.error(err);
+        reject(err);
+      }
+      rows.forEach((row) => { dataDictionary[row.key] = row.value;});
+      let verticalList = Object.entries(dataDictionary)
+       .map(([key, value]) => `**${key}** :  ${value}`)
+       .join('\n'); 
+      if (!verticalList){
+        verticalList = "no codes registered yet!";
+      }
+      const embed = new EmbedBuilder()
+        .setColor(16777215)
+        .setAuthor({ name: "Code list" })
+        .setDescription(verticalList)
+        .setFooter({
+          text: ' ',
+          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+      });
+      db.close();
+      resolve(embed)
+      // const messagetotal = new MessagePayloadContent()
+      // .setContent('This is a sample text message.')
+      // .setEmbeds([embed]);
+    });
+  });
+}
 
   

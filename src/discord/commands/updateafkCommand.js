@@ -14,7 +14,14 @@ const {
   module.exports = {
     name: "updateafk",
     description: "Update & list of afk requests",
-    options: [],
+    options: [
+      {
+        name: "delete_id",
+        description: "afk request (message id) to remove (optional)",
+        required: false,
+        type: 3,
+      }, 
+    ],
 
     execute: async (interaction) => {       
         const db = new sqlite3.Database('afkdatabase.sqlite');
@@ -23,12 +30,41 @@ const {
           const guild = interaction.guild;
           const channel = guild.channels.cache.get("1176872483979264101");
 
+          const delete_id = interaction.options.getString("delete_id");
+          try{
+
+          if (delete_id){
+            await new Promise((resolve, reject) => {
+              db.each(`
+                SELECT key FROM afkdata
+                WHERE key = $delete_id
+              `, {
+                $delete_id : delete_id,
+              }, async function(error, row) {
+                if (error) {
+                  console.error('Error selecting rows:', error);
+                  reject(error);
+                } else {
+
+                  const delete_Message = await channel.messages.fetch(row.key);
+                  delete_Message.delete();
+                }
+              }, function (err, count) {
+                //console.log('Iteration complete. Total rows:', count);
+        
+                resolve();
+              });
+            });
+
+            db.run(`DELETE FROM afkdata WHERE key = ?`, [delete_id]);
+          }
+
 
           const newEmbed = new EmbedBuilder()
           .setColor("Grey")
           .setTitle("**Expired :warning:**");
 
-          try {
+          
             date_now = Date.now();
             
             await new Promise((resolve, reject) => {
@@ -53,6 +89,8 @@ const {
                   
                 }
               }, function (err, count) {
+                //console.log('Iteration complete. Total rows:', count);
+        
                 resolve();
               });
             });
@@ -68,7 +106,7 @@ const {
             if (error) {
               console.error('Error deleting rows:', error);
             } else {
-              //console.log(`Deleted ${this.changes} rows`);
+              console.log(`Deleted ${this.changes} rows`);
             }
           });
 
@@ -108,3 +146,5 @@ async function getList(db){
       });
     });
 }
+
+

@@ -69,9 +69,9 @@ module.exports = {
     const hasSergeant = interaction.member.roles.cache.has('819233569864024067');
     const hasSoldier = interaction.member.roles.cache.has('819233714558730311');
 
-    // if (daysDiff <= 0){
-    //   throw `You cannot put a date in the past! (*you put <t:${date/1000}:d>*)`;
-    // } 
+    if (daysDiff <= 0){
+      throw `You cannot put a date in the past! (*you put <t:${date/1000}:d>*)`;
+    } 
       
     if (hasCaptain && daysDiff > 93){
       throw `<@&819233568374390815> rank cannot make afk requests longer than 3 months! (*But you can renew them*)`;

@@ -28,7 +28,7 @@ const {
         db.run('CREATE TABLE IF NOT EXISTS afkdata (key TEXT PRIMARY KEY, user TEXT NOT NULL, date TEXT, reason TEXT)');
 
           const guild = interaction.guild;
-          const channel = guild.channels.cache.get("1176872483979264101");
+          const channel = guild.channels.cache.get("1100048976599863357");
 
           const delete_id = interaction.options.getString("delete_id");
           try{

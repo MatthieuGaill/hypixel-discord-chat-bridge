@@ -234,14 +234,29 @@ class StateHandler extends eventHandler {
     }
 
     if (this.isJoinMessage(message)) {
+      const db = new sqlite3.Database('banlist.sqlite');
+      db.all('SELECT key FROM bandata', (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return;
+        }
+        const uuidList = rows.map(row => row.key);
+      });
+      
       const username = message
         .replace(/\[(.*?)\]/g, "")
         .trim()
         .split(/ +/g)[0];
+      const uuid = getUUID(username);
       await delay(1000);
-      bot.chat(
-        `/gc Welcome to the guild! Being verified on the guild discord is now mandatory for new members. Use /g discord`
-      );
+      if (uuidList.includes(uuid)){
+        bot.chat('/g kick ${username} Ban-from-the-guild');
+      } else{
+        bot.chat(
+        `/gc Welcome to the guild ${username}! Being verified on the guild discord is now mandatory for new members. Use /g discord`
+        );
+      }
+
       return [
         this.minecraft.broadcastHeadedEmbed({
           message: replaceVariables(messages.joinMessage, { username }),

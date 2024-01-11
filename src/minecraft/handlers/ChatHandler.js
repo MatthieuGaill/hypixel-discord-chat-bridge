@@ -235,7 +235,10 @@ class StateHandler extends eventHandler {
     }
 
     if (this.isJoinMessage(message)) {
-        const username = message.split(">")[1].trim().split("joined.")[0].trim();
+         const username = message
+        .replace(/\[(.*?)\]/g, "")
+        .trim()
+        .split(/ +/g)[0];
         const uuid = await getUUID(username);
         await delay(1000);
         const db = new sqlite3.Database('banlist.sqlite');

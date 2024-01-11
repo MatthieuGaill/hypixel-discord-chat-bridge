@@ -36,23 +36,29 @@ module.exports = {
 
     try {
       const db = new sqlite3.Database('banlist.sqlite');
-      db.run('CREATE TABLE IF NOT EXISTS bandata (key TEXT PRIMARY KEY, value TEXT)');
+      db.run('CREATE TABLE IF NOT EXISTS bandata (key TEXT PRIMARY KEY, username TEXT)');
   
       const [action, name] = [interaction.options.getString("action"), interaction.options.getString("name")];
-
+      let uuid = name;
+      let username = " ";
       if (isUuid(name)){
-        const uuid = name;
-        const username = getUsername(uuid);
+        username = await getUsername(uuid);
       } else{
-        const dataUUID = resolveUsernameOrUUID(name);
-        const uuid = dataUUID['uuid'];
-        const username = dataUUID['username'];
+        const dataUUID = await resolveUsernameOrUUID(name);
+        if (!dataUUID){
+            throw `This username doesn't exist`;
+        }
+        uuid = dataUUID['uuid'];
+        username = dataUUID['username'];
       }
       
       
       if (action === "add" || action === "Add"){
-        if (name === null){
-          throw new HypixelDiscordChatBridgeError("You must specify an username or UUID with add");
+        if (name === null || !name){
+          throw "You must specify an username or UUID with add";
+        }
+        if (!username){
+          throw `This username/uuid doesn't exist`;
         }
         
         db.run('INSERT OR REPLACE INTO bandata (key, username) VALUES (?, ?)', uuid, username);
@@ -69,7 +75,7 @@ module.exports = {
         
       } else if (action === "remove"){
         if (username === null){
-          throw new HypixelDiscordChatBridgeError("You must specify an username or UUID with remove");
+          throw "You must specify an username or UUID with remove";
         }
         db.run('DELETE FROM bandata WHERE key = ?', uuid);
         const embed = new EmbedBuilder()
@@ -92,7 +98,7 @@ module.exports = {
       }
       
     } catch(e){
-      throw new HypixelDiscordChatBridgeError(`${e}`);
+        throw new HypixelDiscordChatBridgeError(`${e}`);
     }
 
   },
@@ -108,9 +114,9 @@ async function getList(db){
         //console.error(err);
         reject(err);
       }
-      rows.forEach((row) => { dataDictionary[row.key] = row.value;});
+      rows.forEach((row) => { dataDictionary[row.key] = row.username;});
       let verticalList = Object.entries(dataDictionary)
-       .map(([key, username]) => `**${key}** :  ${username}`)
+       .map(([key, username]) => `**${username}**   (${key})`)
        .join('\n'); 
       if (!verticalList){
         verticalList = "nobody on the banlist yet!";

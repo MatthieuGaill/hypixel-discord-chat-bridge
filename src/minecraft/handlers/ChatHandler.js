@@ -250,7 +250,7 @@ class StateHandler extends eventHandler {
           }
           uuidList = rows.map(row => row.key);
           if (uuidList.includes(uuid)){
-            bot.chat('/g kick ${username} banned');
+            bot.chat(`/g kick ${username} banned`);
           } else{
             bot.chat(`/gc Welcome to the guild ${username}! Being verified on the guild discord is now mandatory for new players. Use /g discord`);
           }

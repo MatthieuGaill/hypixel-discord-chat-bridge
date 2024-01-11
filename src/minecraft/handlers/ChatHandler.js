@@ -9,6 +9,7 @@ const messages = require("../../../messages.json");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const Logger = require("../../Logger.js");
+const sqlite3 = require('sqlite3');
 
 class StateHandler extends eventHandler {
   constructor(minecraft, command, discord) {
@@ -198,8 +199,8 @@ class StateHandler extends eventHandler {
             )
             .setThumbnail(`https://www.mc-heads.net/avatar/${player.nickname}`)
             .setFooter({
-              text: `by @duckysolucky | /help [command] for more information`,
-              iconURL: "https://imgur.com/tgwQJTX.png",
+              text: `/help [command] for more information`,
+              iconURL: "https://i.imgur.com/Fc2R9Z9.png",
             });
 
           await client.channels.cache.get(`${config.discord.channels.loggingChannel}`).send({ embeds: [statsEmbed] });
@@ -234,28 +235,24 @@ class StateHandler extends eventHandler {
     }
 
     if (this.isJoinMessage(message)) {
-      const db = new sqlite3.Database('banlist.sqlite');
-      db.all('SELECT key FROM bandata', (err, rows) => {
-        if (err) {
-            console.error(err.message);
-            return;
-        }
-        const uuidList = rows.map(row => row.key);
-      });
-      
-      const username = message
-        .replace(/\[(.*?)\]/g, "")
-        .trim()
-        .split(/ +/g)[0];
-      const uuid = getUUID(username);
-      await delay(1000);
-      if (uuidList.includes(uuid)){
-        bot.chat('/g kick ${username} Ban-from-the-guild');
-      } else{
-        bot.chat(
-        `/gc Welcome to the guild ${username}! Being verified on the guild discord is now mandatory for new members. Use /g discord`
-        );
-      }
+        const username = message.split(">")[1].trim().split("joined.")[0].trim();
+        const uuid = await getUUID(username);
+        await delay(1000);
+        const db = new sqlite3.Database('banlist.sqlite');
+        let uuidList = [];
+        
+        db.all('SELECT key FROM bandata', [], (err, rows) => {
+          if (err) {
+            console.error(err);
+          }
+          uuidList = rows.map(row => row.key);
+          if (uuidList.includes(uuid)){
+            bot.chat('/g kick ${username} banned');
+          } else{
+            bot.chat(`/gc Welcome to the guild ${username}! Being verified on the guild discord is now mandatory for new players. Use /g discord`);
+          }
+          db.close();
+        });
 
       return [
         this.minecraft.broadcastHeadedEmbed({

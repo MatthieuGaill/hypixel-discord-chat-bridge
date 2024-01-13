@@ -13,9 +13,23 @@ module.exports = {
   options: [
     {
       name: "action",
-      description: "action to run: (add/remove/list)",
+      description: "action to run",
       type: 3,
       required: true,
+      choices: [
+        {
+          name: "Add (need a name/UUID)",
+          value: "add",
+        },
+        {
+          name: "Show the ban list",
+          value: "list",
+        },
+        {
+          name: "Remove (need a name/UUID)",
+          value: "remove",
+        },
+      ],
     },
     {
       name: "name",
@@ -53,7 +67,7 @@ module.exports = {
       }
       
       
-      if (action === "add" || action === "Add"){
+      if (action === "add"){
         if (name === null || !name){
           throw "You must specify an username or UUID with add";
         }

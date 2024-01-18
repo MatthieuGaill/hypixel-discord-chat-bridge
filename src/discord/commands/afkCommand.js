@@ -78,6 +78,9 @@ module.exports = {
     const channel = guild.channels.cache.get("1100048976599863357");
 
     try{
+      if (!/^0[1-9]|[1-2][0-9]|3[0-1]/.test(day)){
+        throw `Invalid day of a month! it must go from (0)1 to 31`;
+      }
       const date = convertDateFormatToTimestamp(day, month, year);
       const date_format = `<t:${date/1000}:d>`; 
    

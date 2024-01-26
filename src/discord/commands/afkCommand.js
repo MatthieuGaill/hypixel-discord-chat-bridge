@@ -78,7 +78,7 @@ module.exports = {
     const channel = guild.channels.cache.get("1100048976599863357");
 
     try{
-      if (!/^0[1-9]|[1-2][0-9]|3[0-1]/.test(day)){
+      if (!/^(0[1-9]|1\d|2[0-9]|3[0-1])$/.test(day)){
         throw `Invalid day of a month! it must go from (0)1 to 31`;
       }
       const date = convertDateFormatToTimestamp(day, month, year);
@@ -103,16 +103,16 @@ module.exports = {
       } 
         
       if (hasCaptain && daysDiff > 93){
-        throw `<@&819233568374390815> rank cannot make afk requests longer than 3 months! (*But you can renew them*)`;
+        throw `Captain rank cannot make afk requests longer than 3 months! (*But you can renew them*)`;
       }
       if(hasLieutenant && daysDiff > 62){
-        throw `<@&819233569401995294> rank cannot make afk requests longer than 2 months! (*But you can renew them*)`;
+        throw `Lieutenant rank cannot make afk requests longer than 2 months! (*But you can renew them*)`;
       }
       if(hasSergeant && daysDiff > 31){
-        throw `<@&819233569864024067> rank cannot make afk requests longer than 1 months! (*But you can renew them*)`;
+        throw `Sergeant rank cannot make afk requests longer than 1 months! (*But you can renew them*)`;
       }
       if (hasSoldier && daysDiff > 15.5){
-        throw `<@&819233714558730311> rank cannot make afk requests longer than 2 weeks! (*But you can renew them*)`;
+        throw `Soldier rank cannot make afk requests longer than 2 weeks! (*But you can renew them*)`;
       }
   
   

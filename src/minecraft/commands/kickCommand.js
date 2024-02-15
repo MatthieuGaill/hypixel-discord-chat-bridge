@@ -45,7 +45,7 @@ class KickCommand extends minecraftCommand {
            if (message.includes("was kicked")){
              this.send(`/gc ${kick_username} has been kicked from the guild for ${reason}`);
              await delay(2000);
-           }else if (message.includes("cannot kick") || message.includes("find") || message.includes("is not") ||  message.includes("Invalid"))){
+           }else if (message.includes("cannot kick") || message.includes("find") || message.includes("is not") ||  message.includes("Invalid")){
               this.send(`/gc [ERROR] ${message}`);
               bot.removeListener("message", muteListener);
               isRemove = true;

@@ -34,20 +34,24 @@ module.exports = {
           value: "Crafting :tools:*2",
         },
         {
+          name: "Reforging (help apply reforge)",
+          value: "Reforging :magic_wand:*3",
+        },
+        {
           name: "Slayer carries",
-          value: "Slayer :spider:*3",
+          value: "Slayer :spider:*4",
         },
         {
           name: "Dungeon carries",
-          value: "Dungeon :crossed_swords:*4",
+          value: "Dungeon :crossed_swords:*5",
         },
         {
           name: "Gifting (items, rank, ...)",
-          value: "Gifting :gift:*5",
+          value: "Gifting :gift:*6",
         },
         {
           name: "Other (you can use the comment option)",
-          value: "Other*6",
+          value: "Other*7",
         }
       ],
     },

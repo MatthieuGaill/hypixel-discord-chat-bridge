@@ -34,20 +34,24 @@ module.exports = {
           value: "Crafting :tools:*2",
         },
         {
+          name: "Reforging (help apply reforge)",
+          value: "Reforging :magic_wand:*3",
+        },
+        {
           name: "Slayer carries",
-          value: "Slayer :spider:*3",
+          value: "Slayer :spider:*4",
         },
         {
           name: "Dungeon carries",
-          value: "Dungeon :crossed_swords:*4",
+          value: "Dungeon :crossed_swords:*5",
         },
         {
           name: "Gifting (items, rank, ...)",
-          value: "Gifting :gift:*5",
+          value: "Gifting :gift:*6",
         },
         {
           name: "Other (you can use the comment option)",
-          value: "Other :regional_indicator_o:*6",
+          value: "Other :regional_indicator_o:*7",
         }
       ],
     },
@@ -147,7 +151,7 @@ async function Updatedatabase(db, member_id, choiceIndex) {
           reject(err.message);
         }
         if (!row) {
-          let newType = [0,0,0,0,0,0,0];
+          let newType = [0,0,0,0,0,0,0,0];
           newType[choiceIndex] = 1
           db.run('INSERT INTO repdata (key, reputation, typerep) VALUES (?, 1, ?)', [member_id, JSON.stringify(newType)]);
           resolve(false);

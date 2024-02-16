@@ -6,11 +6,11 @@ const config = require("../../../config.json");
 
 module.exports = {
   name: "profile",
-  description: "Display the leaderboard",
+  description: "Display the reputation profile of a member",
   options: [
     {
       name: "member",
-      description: "only if you chose member",
+      description: "member",
       type: 6,
       required: false,
     },

@@ -68,12 +68,13 @@ async function getPlayer(db, member){
       const Label = [":blue_book: *Explaining*\u200B\u200B \u200B \u200B",
                     ":bank: *Loaning*\u200B \u200B \u200B \u200B \u200B \u200B \u200B",
                     ":tools: *Crafting*\u200B \u200B \u200B \u200B \u200B \u200B \u200B",
-                    ":spider: *Slayer*\u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B",
+                    ":magic_wand: *Reforging*\u200B \u200B \u200B \u200B \u200B",
+                    ":spider: *Slayer*\u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B ",
                     ":crossed_swords: *Dungeon*\u200B \u200B \u200B \u200B \u200B \u200B",
                     ":gift: *Gifting*\u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B",
                     ":regional_indicator_o: *Other* \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B\u200B \u200B \u200B \u200B"];
       let detailList = ""
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 8; i++) {
         detailList += `${Label[i]} ${typerep[i]} \n`;
       }
       const fields = [

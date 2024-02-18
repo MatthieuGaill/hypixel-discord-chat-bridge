@@ -1,6 +1,25 @@
-const minecraftCommand = require("../../contracts/minecraftCommand.js");
+onst minecraftCommand = require("../../contracts/minecraftCommand.js");
 const {Translate} = require('@google-cloud/translate').v2;
 require('dotenv').config();
+
+// Commands
+const commands = [
+  "!8ball", "!8b", "!accesories","!acc", "!talismans","!talisman",
+  "!auction", "!ah", "!auctions", "!bedwars", "!bw", "!bws",
+  "!bestiary", "!be","!calculate", "!calc", "!math",
+  "!catacombs", "!cata", "!dungeons", "!duels", "!duel", "!fairysouls",
+  "!fs", "!fetchur", "!guild", "!g","!guildexp","!gexp",
+  "!help", "!info", "!hypixel", "!h", "!kick", "!k", "!kitty",
+  "!cat", "!cutecat", "!megawalls", "!mw", "!mute", "!m",
+  "!networth", "!nw", "!quickmaths","!qm", "!armor",
+  "!equipment", "!render", "!inv", "!i",
+  "!inventory", "!pet", "!pets", "!rules", "!r", "!skills",
+  "!skill", "!sa", "!skyblock", "!stats", "!sb", "!level",
+  "!lvl", "!skywars", "!sw", "!slayer", "!slayers",
+  "!translate", "!ts", "!UHC", "!uhc", "!unmute", "!um",
+  "!unscramble", "!us", "!unscrambleme", "!warpout", "!warp",
+  "!weight", "!w", "!woolwars", "!ww"
+]
 
 // Your credentials
 const CREDENTIALS = JSON.parse(process.env.CREDENTIALS)
@@ -26,7 +45,6 @@ class TranslateCommand extends minecraftCommand {
       },
     ];
   }
-    
   async onCommand(username, message) {
     const arg = this.getArgs(message);
     try {
@@ -35,9 +53,11 @@ class TranslateCommand extends minecraftCommand {
         throw "You must provide a sentence to translate.";
       }
       const text = arg.join(' ');
-      if (text.includes('!')) {
-        throw "Please refrain from using !";
-      }
+      commands.forEach(command => {
+        if (text.includes(command)) {
+          throw "Please refrain from using a command in translation";
+        }
+      })
       let [response] = await translate.translate(text, 'en');
       this.send(`/gc Translation: ${response}`);
 
@@ -48,3 +68,4 @@ class TranslateCommand extends minecraftCommand {
 }
 
 module.exports = TranslateCommand;
+

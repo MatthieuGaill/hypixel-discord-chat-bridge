@@ -10,7 +10,7 @@ class KickCommand extends minecraftCommand {
 
     this.name = "kick";
     this.aliases = ["k"];
-    this.description = "Kick player for a given duration (admin only)";
+    this.description = "Kick player (admin only)";
     this.options = [
       {
         name: "username",
@@ -35,7 +35,7 @@ class KickCommand extends minecraftCommand {
       }
       const arg = this.getArgs(message);
       if (!arg[0] || !arg[1]) {
-        this.send("/gc Wrong Usage: !kick [name] [reason]");
+        this.send("/oc Wrong Usage: !kick [name] [reason]");
       }
       const kick_username = arg[0];
       const reason = arg[1];
@@ -46,7 +46,7 @@ class KickCommand extends minecraftCommand {
              this.send(`/gc ${kick_username} has been kicked from the guild for ${reason}`);
              await delay(2000);
            }else if (message.includes("cannot kick") || message.includes("find") || message.includes("is not") ||  message.includes("Invalid")){
-              this.send(`/gc [ERROR] ${message}`);
+              this.send(`/oc [ERROR] ${message}`);
               bot.removeListener("message", muteListener);
               isRemove = true;
            }
@@ -58,7 +58,7 @@ class KickCommand extends minecraftCommand {
         bot.removeListener("message", muteListener);    
       }
     } catch (error) {
-      this.send(`/gc [ERROR] ${error}`);
+      this.send(`/oc [ERROR] ${error}`);
     }
   }
 }

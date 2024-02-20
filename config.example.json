@@ -7,13 +7,19 @@
     },
     "commands": {
       "normal": true,
-      "soopy": true,
+      "soopy": false,
+      "helper_list": [
+        "3c1ec50e1cf941a1842dde1af4920bf0" //RochellieBelly
+        ],
       "mod_list": [
-        "a608e10c911648a5956590a9bb0bec93",
-        "3491fcab26dc4b7fa1525dd445ba8f62",
-        "279abb0f86f343f9a10e881ff6959b78",
-        "b0848e9c82d44d68a810df01a655fe97",
-        "589ae94cdf3d4f468adcb5436793eec0"
+        "a608e10c911648a5956590a9bb0bec93", //Teo
+        "8c5f8ba0a2e94d818faaa8368e5cb95e", //Kovarin
+        "097103c73e87485a82390e2f25e4f389", //ghel
+        "9b4360f68eed41bcb2e213c1bce0144f", //Risnake
+        "3491fcab26dc4b7fa1525dd445ba8f62", //SsnOOpy
+        "279abb0f86f343f9a10e881ff6959b78", //Matthipcas
+        "b0848e9c82d44d68a810df01a655fe97", //ObsidianVolt
+        "589ae94cdf3d4f468adcb5436793eec0"  //Emmacrecre 
       ],
       "admin_list": [
         "a608e10c911648a5956590a9bb0bec93",

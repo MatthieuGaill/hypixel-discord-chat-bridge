@@ -41,19 +41,22 @@ class MuteCommand extends minecraftCommand {
       }
       const arg = this.getArgs(message);
       if (!arg[0] || !arg[1]) {
-        this.send("/gc Wrong Usage: !mute [name] [time] [reason (opt)]");
+        this.send("/oc Wrong Usage: !mute [name] [time] [reason (opt)]");
       }
       const muted_username = arg[0];
       const time = arg[1];
-      const reason = arg[2];
+      let reason = "";
+      if (arg[2]){
+        reason = arg[2];
+      }
   
       const muteListener = async (message) => {
            message = message.toString();
            if (message.includes("has muted")){
              this.send(`/gc ${muted_username} has been muted for ${time}, ${reason}`);
-             await delay(2000);
+             await delay(1000);
            }else if (message.includes("cannot") || message.includes("find") || message.includes("Invalid")){
-              this.send(`/gc [ERROR] ${message}`);
+              this.send(`/oc [ERROR] ${message}`);
               bot.removeListener("message", muteListener);
               isRemove = true;
            }
@@ -65,7 +68,7 @@ class MuteCommand extends minecraftCommand {
         bot.removeListener("message", muteListener);    
       }
     } catch (error) {
-      this.send(`/gc [ERROR] ${error}`);
+      this.send(`/oc [ERROR] ${error}`);
     }
   }
 }

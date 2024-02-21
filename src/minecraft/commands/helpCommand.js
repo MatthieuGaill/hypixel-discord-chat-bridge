@@ -32,8 +32,8 @@ class HelpCommand extends minecraftCommand {
               return instance;
             }
           });
-        if (commandInstances) {
-          const commandInstance = commandInstances.filter(elem => elem != undefined)[0];
+        const commandInstance = commandInstances.filter(elem => elem != undefined)[0];
+        if (commandInstance) {
           this.send(`/gc ${capitalizeFirstLetter(commandInstance.name)} Command | Aliases: ${commandInstance.aliases.join(", ")} | Parameters: ${commandInstance.options.length > 0 ? commandInstance.options.map(option => {return option.required ? `(${option.name})` : `[${option.name}]`}).join(", ") : "None"} | Description: ${commandInstance.description}`);
         } else {
           console.log(`command: ${command}`);

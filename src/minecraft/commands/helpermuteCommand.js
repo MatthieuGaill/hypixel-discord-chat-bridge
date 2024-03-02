@@ -35,19 +35,19 @@ class HelpermuteCommand extends minecraftCommand {
         throw 'No permission';
       }
       const arg = this.getArgs(message);
-      if (!arg[0] || !arg[1]) {
-        this.send("/gc Wrong Usage: !mute [name] [reason (opt)]");
+      if (!arg[0]) {
+        this.send("/gc Wrong Usage: !hm [name] [reason (opt)]");
       }
       const muted_username = arg[0];
       const time = arg[1];
       let reason = "";
-      if (arg[2]){
-        reason = arg[2];
+      if (arg[1]){
+        reason = arg[1];
       }
   
       const muteListener = async (message) => {
            message = message.toString();
-           if (message.includes("has muted")){
+           if (message.includes("muted")){
              this.send(`/gc ${muted_username} has been muted for 1 hour, ${reason}`);
              await delay(1000);
            }else if (message.includes("cannot") || message.includes("find") || message.includes("Invalid")){

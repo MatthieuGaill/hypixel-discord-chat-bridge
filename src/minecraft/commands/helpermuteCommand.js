@@ -30,7 +30,7 @@ class HelpermuteCommand extends minecraftCommand {
     try {
       let isRemove = false;
       const uuid = await getUUID(username);
-      const mod_list = config.minecraft.commands.mod_list;
+      const helper_list = config.minecraft.commands.helper_list;
       if (!helper_list.includes(uuid)){
         throw 'No permission';
       }

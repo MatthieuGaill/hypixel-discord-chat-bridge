@@ -47,7 +47,7 @@ class HelpermuteCommand extends minecraftCommand {
   
       const muteListener = async (message) => {
            message = message.toString();
-           if (message.includes("muted")){
+           if (message.includes("has muted")){
              this.send(`/gc ${muted_username} has been muted for 1 hour, ${reason}`);
              await delay(1000);
            }else if (message.includes("cannot") || message.includes("find") || message.includes("Invalid")){

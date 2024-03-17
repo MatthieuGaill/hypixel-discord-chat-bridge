@@ -2,6 +2,7 @@ const sqlite3 = require('sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 module.exports = {
   name: "code",
@@ -27,8 +28,7 @@ module.exports = {
     const db = new sqlite3.Database('database.sqlite');
     db.run('CREATE TABLE IF NOT EXISTS ticketdata (key TEXT PRIMARY KEY, value TEXT)');
 
-    const code_key = interaction.options.getString("code");
-    let key_value;
+    const code_key = interaction.options.getString("code").toUpperCase().replace(/\s/g, '');;
 
     db.get('SELECT value FROM ticketdata WHERE key = ?', [code_key], (err, row) => {
       if (err) {
@@ -37,13 +37,13 @@ module.exports = {
         return;
       }
       const embed = new EmbedBuilder();
-    
+      console.log(row);
+      
       if (row) {
-        key_value = row.value;
         embed
         .setColor(12745742)
         .setAuthor({ name: "Prize claimed!" })
-        .setDescription(`Congratulations <@${user.id}> you won a **${key_value}**`)
+        .setDescription(`Congratulations <@${user.id}> you won a **${row.value}**`)
         .setFooter({
           text: ' ',
           iconURL: "https://i.imgur.com/Fc2R9Z9.png",});
@@ -61,10 +61,9 @@ module.exports = {
       
       interaction.followUp({embeds: [embed],});
     });
-    
+
+    await delay(1200);
     db.run('DELETE FROM ticketdata WHERE key = ?', [code_key]);
-    // console.log("----------------------------")
-    // console.log(`${code_key} removed`)
 
   }
 };

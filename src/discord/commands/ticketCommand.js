@@ -14,6 +14,20 @@ module.exports = {
       description: "action to run: (add/remove/list)",
       type: 3,
       required: true,
+      choices: [
+        {
+          name: "Add",
+          value: "add",
+        },
+        {
+          name: "Remove",
+          value: "remove",
+        },
+        {
+          name: "List",
+          value: "list",
+        },
+      ]
     },
     {
       name: "code",
@@ -42,7 +56,7 @@ module.exports = {
 
     const [action, code_key, code_value] = [interaction.options.getString("action"), interaction.options.getString("code"), interaction.options.getString("value")];
 
-    if (action === "add" || action === "Add"){
+    if (action === "add"){
       if (code_key === null || code_value === null){
         throw new HypixelDiscordChatBridgeError("You must specify a code & value with add");
       }
@@ -79,7 +93,7 @@ module.exports = {
       const embed = await getList(db);
     
       await interaction.followUp( {embeds: [embed]});
-      //await interaction.editReply("test");
+      
     } else {
       throw new HypixelDiscordChatBridgeError("Wrong usage: /ticket (add/remove/list) [code] [value]");
     }
@@ -114,9 +128,7 @@ async function getList(db){
       });
       db.close();
       resolve(embed)
-      // const messagetotal = new MessagePayloadContent()
-      // .setContent('This is a sample text message.')
-      // .setEmbeds([embed]);
+
     });
   });
 }

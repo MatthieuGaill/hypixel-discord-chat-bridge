@@ -1,16 +1,18 @@
 const minecraftCommand = require("../../contracts/minecraftCommand.js");
-const {Translate} = require('@google-cloud/translate').v2;
+// const {Translate} = require('@google-cloud/translate').v2;
+const deepl = require('deepl-node');
 const fs = require("fs");
 require('dotenv').config();
 
 // Your credentials
-const CREDENTIALS = JSON.parse(process.env.CREDENTIALS)
+//const CREDENTIALS = JSON.parse(process.env.CREDENTIALS)
 
 // Configuration for the client
-const translate = new Translate({
-    credentials: CREDENTIALS,
-    projectId: CREDENTIALS.project_id
-});
+// const translate = new Translate({
+//     credentials: CREDENTIALS,
+//     projectId: CREDENTIALS.project_id
+// });
+const translate = new deepl.Translator("186c7b03-adc1-4061-81db-35a55811fd3e:fx");
 
 class TranslateCommand extends minecraftCommand {
   constructor(minecraft) {
@@ -36,7 +38,6 @@ class TranslateCommand extends minecraftCommand {
             let instance = new (require(`./${file}`))()
             return [instance.name, ...instance.aliases].map(elem => "!" + elem)
           }).flat();
-    
     try {
       if (arg.length === 0) {
         // eslint-disable-next-line no-throw-literal
@@ -45,12 +46,13 @@ class TranslateCommand extends minecraftCommand {
       const text = arg.join(' ');
       commands.forEach(command => {
         if (text.includes(command)) {
-          console.log(`command : ${command}`);
           throw "Please refrain from using a command in translation";
         }
       })
-      let [response] = await translate.translate(text, 'en');
-      this.send(`/gc Translation: ${response}`);
+      // let [response] = await translate.translate(text, 'en');
+      let response = await translate.translateText(text, null, "en-US");
+      // this.send(`/gc Translation: ${response}`);
+      this.send(`/gc Translation: ${response.text}`);
 
     } catch (error) {
       this.send(`/gc [ERROR] ${error}`);
@@ -59,4 +61,3 @@ class TranslateCommand extends minecraftCommand {
 }
 
 module.exports = TranslateCommand;
-

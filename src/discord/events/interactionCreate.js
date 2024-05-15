@@ -7,6 +7,10 @@ module.exports = {
   name: "interactionCreate",
   async execute(interaction) {
     try {
+      if (!interaction.inGuild()) {
+        await interaction.reply({ content: 'Sorry, commands cannot be used in private messages.', ephemeral: true });
+        return;
+      }
       if (interaction.isChatInputCommand()) {
         await interaction.deferReply({ ephemeral: false }).catch(() => {});
 
@@ -48,12 +52,12 @@ module.exports = {
             }\`\n\`\`\`${error.stack}\`\`\``
           )
           .setFooter({
-            text: `by DuckySoLucky#5181`,
-            iconURL: "https://imgur.com/tgwQJTX.png",
+            text: `Golden Bot`,
+            iconURL: "https://imgur.com/Fc2R9Z9",
           });
 
         interaction.client.channels.cache.get(config.discord.channels.loggingChannel).send({
-          content: `<@&${config.discord.commands.commandRole}>`,
+          content: `<@629735859653967912>`,
           embeds: [errorLog],
         });
       }

@@ -1,5 +1,7 @@
 const minecraftCommand = require("../../contracts/minecraftCommand.js");
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const { getUUID } = require("../../contracts/API/PlayerDBAPI.js");
+const sqlite3 = require('sqlite3');
 
 class warpoutCommand extends minecraftCommand {
   constructor(minecraft) {
@@ -18,13 +20,25 @@ class warpoutCommand extends minecraftCommand {
   }
   async onCommand(username, message) {
     try {
+      let user = this.getArgs(message)[0];
+
+      let uuid = await getUUID(username).catch((error) => {
+        this.send(`/oc [ERROR] ${error}`);
+        uuid = '0';
+       });
+      const uuidL = await getAuthorization();
+      if (uuidL.includes(uuid)){
+        throw 'No permission'
+      }
+      await delay(500);
+
       if (this.isOnCooldown) {
         return this.send(`/gc ${username} Command is on cooldown`);
       }
 
       this.isOnCooldown = true;
 
-      const user = this.getArgs(message)[0];
+      
       if (user === undefined) {
         // eslint-disable-next-line no-throw-literal
         throw "Please provide a username!";
@@ -41,11 +55,11 @@ class warpoutCommand extends minecraftCommand {
           this.isOnCooldown = false;
 
           this.send(`/gc ${user} is not online!`);
-        } else if (message.includes("You cannot invite that player!")) {
+        } else if (message.includes("You cannot invite that player")) {
           bot.removeListener("message", warpoutListener);
           this.isOnCooldown = false;
 
-          this.send(`/gc ${user} has party requests disabled!`);
+          this.send(`/gc ${user} has party requests disabled or ignored Golden_Legion`);
         } else if (message.includes("invited") && message.includes("to the party! They have 60 seconds to accept.")) {
           this.send(`/gc Succesfully invited ${user} to the party!`);
         } else if (message.includes(" joined the party.")) {
@@ -107,11 +121,16 @@ class warpoutCommand extends minecraftCommand {
           await delay(1500);
           this.send("/lobby megawalls");
           this.send("\u00a7");
-        } else if (message.includes("You cannot party yourself!")) {
+        } else if (message.includes("You cannot party yourself")) {
           bot.removeListener("message", warpoutListener);
           this.isOnCooldown = false;
+          this.send(`/gc ${user}, No permission`);
 
-          this.send(`/gc I cannot party yourself!`);
+          await delay(1500);
+          this.send("/lobby megawalls");
+          this.send("\u00a7");
+
+          this.send(`/gc [ERROR] No permission`);
         } else if (message.includes("didn't warp correctly!")) {
           bot.removeListener("message", warpoutListener);
           this.isOnCooldown = false;
@@ -135,11 +154,54 @@ class warpoutCommand extends minecraftCommand {
           this.isOnCooldown = false;
         }
       }, 30000);
+
     } catch (error) {
-      this.send(`/gc ${username} [ERROR] ${error || "Something went wrong.."}`);
+      this.send(`/gc [ERROR] ${error || "Something went wrong.."}`);
+      console.error(error);
       this.isOnCooldown = false;
     }
   }
 }
+
+// async function getAuthorization(username){
+//    console.log(`username0 :  ${username}`)
+//    const db = new sqlite3.Database('blockwarplist.sqlite');
+//    let uuidList = [];
+//    db.all('SELECT key FROM blockwarpdata', [], (err, rows) => {
+//      if (err) {
+//        console.error(err);
+//        this.send(`/oc [ERROR] ${err}`);
+//      }
+//      uuidList = rows.map(row => row.key);
+//      //uuidList.push(row.key);
+//      db.close();
+//    });
+//    return uuidList;
+// }
+
+
+async function getAuthorization() {
+  try {
+    const db = new sqlite3.Database('blockwarplist.sqlite');
+    const rows = await new Promise((resolve, reject) => {
+      db.all('SELECT key FROM blockwarpdata', [], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+    db.close();
+    const uuidList = rows.map(row => row.key);
+    return uuidList;
+  } catch (error) {
+    console.error(error);
+    this.send(`/oc [ERROR] ${err}`);
+    // Handle error appropriately
+    return [];
+  }
+}
+
 
 module.exports = warpoutCommand;

@@ -1,136 +1,136 @@
 {
-  "minecraft": {
-    "bot": {
-      "prefix": "!",
-      "messageFormat": "{username} » {message}",
-      "messageRepeatBypassLength": 24
-    },
-    "commands": {
-      "normal": true,
-      "soopy": false,
-      "helper_list": [
-        "3c1ec50e1cf941a1842dde1af4920bf0",
-        "9b9a026506ee45aa8b4fa2fa6d1b79ab",
-        "069f9962aa754074a5717488c64ccf01",
-        "e551182b39534bb38f5419a36307a2e8",
-        "ee4245ecb2264210aa89d38287febcbe",
-        "f6d5c586cbf14ad999c91a785888fccd"
-        ],
-      "mod_list": [
-        "a608e10c911648a5956590a9bb0bec93",
-        "279abb0f86f343f9a10e881ff6959b78",
-        "589ae94cdf3d4f468adcb5436793eec0",  
-        "b0848e9c82d44d68a810df01a655fe97",
-        "9b4360f68eed41bcb2e213c1bce0144f",
-        "097103c73e87485a82390e2f25e4f389",
-        "3491fcab26dc4b7fa1525dd445ba8f62",
-        "8c5f8ba0a2e94d818faaa8368e5cb95e"
-      ],
-      "admin_list": [
-        "a608e10c911648a5956590a9bb0bec93",
-        "279abb0f86f343f9a10e881ff6959b78",
-        "589ae94cdf3d4f468adcb5436793eec0"
-      ]
-    },
-    "fragBot": {
-      "enabled": true,
-      "whitelist": false,
-      "whitelisted": [],
-      "blacklist": false,
-      "blacklisted": []
-    },
-    "guild": {
-      "guildExp": 50000
-    },
-    "API": {
-      "hypixelAPIkey": "HYPIXEL_API_KEY",
-      "imgurAPIkey": "IMGUR_API_KEY"
-    },
-    "guildRequirements": {
-      "enabled": false,
-      "autoAccept": false,
-      "requirements": {
-        "bedwarsStars": 0,
-        "bedwarsStarsWithFKDR": 0,
-        "bedwarsFKDR": 0,
-        "skywarsStars": 0,
-        "skywarsStarsWithKDR": 0,
-        "skywarsKDR": 0,
-        "duelsWins": 0,
-        "duelsWinsWithWLR": 0,
-        "duelsWLR": 0,
-        "senitherWeight": 0,
-        "lilyWeight": 0,
-        "skyblockLevel": 0
-      }
-    },
-    "skyblockEventsNotifications": {
-      "enabled": false,
-      "notifiers": {
-        "BANK_INTEREST": true,
-        "DARK_AUCTION": true,
-        "ELECTION_BOOTH_OPENS": true,
-        "ELECTION_OVER": true,
-        "FALLEN_STAR_CULT": true,
-        "FEAR_MONGERER": true,
-        "JACOBS_CONTEST": true,
-        "JERRYS_WORKSHOP": true,
-        "NEW_YEAR_CELEBRATION": true,
-        "SEASON_OF_JERRY": true,
-        "SPOOKY_FESTIVAL": true,
-        "TRAVELING_ZOO": true
+    "minecraft": {
+      "bot": {
+        "prefix": "!",
+        "messageFormat": "{username} » {message}",
+        "messageRepeatBypassLength": 24
       },
-      "customTime": {
-        "2": [
-          "BANK_INTEREST",
-          "DARK_AUCTION",
-          "JACOBS_CONTEST"
+      "commands": {
+        "normal": true,
+        "soopy": false,
+        "helper_list": [
+          "3c1ec50e1cf941a1842dde1af4920bf0",
+          "9b9a026506ee45aa8b4fa2fa6d1b79ab",
+          "069f9962aa754074a5717488c64ccf01",
+          "e551182b39534bb38f5419a36307a2e8",
+          "ee4245ecb2264210aa89d38287febcbe",
+          "f6d5c586cbf14ad999c91a785888fccd"
+          ],
+        "mod_list": [
+          "a608e10c911648a5956590a9bb0bec93",
+          "279abb0f86f343f9a10e881ff6959b78",
+          "589ae94cdf3d4f468adcb5436793eec0",  
+          "b0848e9c82d44d68a810df01a655fe97",
+          "9b4360f68eed41bcb2e213c1bce0144f",
+          "097103c73e87485a82390e2f25e4f389",
+          "3491fcab26dc4b7fa1525dd445ba8f62",
+          "8c5f8ba0a2e94d818faaa8368e5cb95e"
+        ],
+        "admin_list": [
+          "a608e10c911648a5956590a9bb0bec93",
+          "279abb0f86f343f9a10e881ff6959b78",
+          "589ae94cdf3d4f468adcb5436793eec0"
         ]
+      },
+      "fragBot": {
+        "enabled": true,
+        "whitelist": false,
+        "whitelisted": [],
+        "blacklist": false,
+        "blacklisted": []
+      },
+      "guild": {
+        "guildExp": 50000
+      },
+      "API": {
+        "hypixelAPIkey": "HYPIXEL_API_KEY",
+        "imgurAPIkey": "IMGUR_API_KEY"
+      },
+      "guildRequirements": {
+        "enabled": false,
+        "autoAccept": false,
+        "requirements": {
+          "bedwarsStars": 0,
+          "bedwarsStarsWithFKDR": 0,
+          "bedwarsFKDR": 0,
+          "skywarsStars": 0,
+          "skywarsStarsWithKDR": 0,
+          "skywarsKDR": 0,
+          "duelsWins": 0,
+          "duelsWinsWithWLR": 0,
+          "duelsWLR": 0,
+          "senitherWeight": 0,
+          "lilyWeight": 0,
+          "skyblockLevel": 0
+        }
+      },
+      "skyblockEventsNotifications": {
+        "enabled": false,
+        "notifiers": {
+          "BANK_INTEREST": true,
+          "DARK_AUCTION": true,
+          "ELECTION_BOOTH_OPENS": true,
+          "ELECTION_OVER": true,
+          "FALLEN_STAR_CULT": true,
+          "FEAR_MONGERER": true,
+          "JACOBS_CONTEST": true,
+          "JERRYS_WORKSHOP": true,
+          "NEW_YEAR_CELEBRATION": true,
+          "SEASON_OF_JERRY": true,
+          "SPOOKY_FESTIVAL": true,
+          "TRAVELING_ZOO": true
+        },
+        "customTime": {
+          "2": [
+            "BANK_INTEREST",
+            "DARK_AUCTION",
+            "JACOBS_CONTEST"
+          ]
+        }
+      },
+      "hypixelUpdates": {
+        "enabled": true,
+        "hypixelNews": true,
+        "statusUpdates": true,
+        "skyblockVersion": true
       }
     },
-    "hypixelUpdates": {
-      "enabled": true,
-      "hypixelNews": true,
-      "statusUpdates": true,
-      "skyblockVersion": true
-    }
-  },
-  "discord": {
-    "bot": {
-      
-      "token": "BOT_TOKEN",
-      "serverID": "819229417796534283"
+    "discord": {
+      "bot": {
+        
+        "token": "BOT_TOKEN",
+        "serverID": "819229417796534283"
+      },
+      "channels": {
+        "guildChatChannel": "1110937815379882004",
+        "officerChannel": "1110981157409005629",
+        "loggingChannel": "1110937815379882004",
+        "debugMode": true,
+        "debugChannel": "1110981189172469821",
+        "allowedBots": [
+          "1109873692344848555"
+        ]
+      },
+      "commands": {
+        "checkPerms": true,
+        "commandRole": "1057376971035783269",
+        "users": [
+          "486155512568741900"
+        ]
+      },
+      "other": {
+        "messageMode": "bot",
+        "messageFormat": "{chatType} > {skin} {rank} {username} {guildRank}§f: {message}",
+        "filterMessages": true,
+        "joinMessage": true
+      }
     },
-    "channels": {
-      "guildChatChannel": "1110937815379882004",
-      "officerChannel": "1110981157409005629",
-      "loggingChannel": "1110937815379882004",
-      "debugMode": true,
-      "debugChannel": "1110981189172469821",
-      "allowedBots": [
-        "1109873692344848555"
-      ]
-    },
-    "commands": {
-      "checkPerms": true,
-      "commandRole": "1057376971035783269",
-      "users": [
-        "486155512568741900"
-      ]
+    "web": {
+      "enabled": false,
+      "port": 1439
     },
     "other": {
-      "messageMode": "bot",
-      "messageFormat": "{chatType} > {skin} {rank} {username} {guildRank}§f: {message}",
-      "filterMessages": true,
-      "joinMessage": true
+      "autoUpdater": false,
+      "autoUpdaterInterval": 12
     }
-  },
-  "web": {
-    "enabled": false,
-    "port": 1439
-  },
-  "other": {
-    "autoUpdater": false,
-    "autoUpdaterInterval": 12
   }
-}

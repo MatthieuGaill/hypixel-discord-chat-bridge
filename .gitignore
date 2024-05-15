@@ -2,3 +2,8 @@ node_modules/
 .prettierrc.json
 config.json
 auth-cache/
+.env
+afkdatabase.sqlite
+banlist.sqlite
+blockwarplist.sqlite
+replist.sqlite

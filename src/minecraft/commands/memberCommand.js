@@ -2,13 +2,13 @@ const minecraftCommand = require("../../contracts/minecraftCommand.js");
 const hypixel = require("../../contracts/API/HypixelRebornAPI.js");
 const { getUUID } = require("../../contracts/API/PlayerDBAPI.js");
 
-class GuildExperienceCommand extends minecraftCommand {
+class MemberCommand extends minecraftCommand {
   constructor(minecraft) {
     super(minecraft);
 
-    this.name = "guildexp";
-    this.aliases = ["gexp"];
-    this.description = "Guilds experience of specified user.";
+    this.name = "member";
+    this.aliases = ["m"];
+    this.description = "Guild Info of specified user.";
     this.options = [
       {
         name: "username",
@@ -33,10 +33,11 @@ class GuildExperienceCommand extends minecraftCommand {
 
       if (player === undefined) {
         // eslint-disable-next-line no-throw-literal
-        throw "Player is not in the Guild.";
+        throw "Player is not in a Guild.";
       }
-
-      this.send(`/gc ${username}'s Weekly Guild Experience: ${player.weeklyExperience.toLocaleString()}.`);
+      const joinedDate = new Date(player.joinedAtTimestamp);
+      const daysDifference = (Date.now() - joinedDate) / (1000 * 60 * 60 * 24);
+      this.send(`/gc ${username}'s Guild: [${guild.name}], Rank: ${player.rank}, Quests: ${player.questParticipation}, Joined: ${joinedDate.getDate()} ${joinedDate.toLocaleString('default', { month: 'long' })} ${joinedDate.getFullYear()}  (${daysDifference.toFixed(0)} days)`);
     } catch (error) {
       this.send(
         `/gc ${error
@@ -49,4 +50,4 @@ class GuildExperienceCommand extends minecraftCommand {
   }
 }
 
-module.exports = GuildExperienceCommand;
+module.exports = MemberCommand;

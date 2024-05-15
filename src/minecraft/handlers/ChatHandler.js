@@ -35,6 +35,13 @@ class StateHandler extends eventHandler {
     if (message.includes("APPEARING OFFLINE") || message.includes("YOU ARE IN A PREGAME") || message.includes("HYPIXEL.NET") || message.includes("YOU MAY DRIVE")) {
       return;
     }
+    // const message1 = message.toLowerCase();
+    // if (message1.includes("pluh") || message1.includes("plug") || message1.includes("plugh") || message1.includes("plu h")) {
+    //   const username = message.split(" ")[3].trim();
+    //   this.send('/gc pluh');
+    //   await delay(1000);
+    //   this.send(`/g mute ${username} 5m`);
+    // }
 
     if (config.discord.channels.debugMode === true) {
       this.minecraft.broadcastMessage({
@@ -235,27 +242,34 @@ class StateHandler extends eventHandler {
     }
 
     if (this.isJoinMessage(message)) {
-         const username = message
-        .replace(/\[(.*?)\]/g, "")
-        .trim()
-        .split(/ +/g)[0];
-        const uuid = await getUUID(username);
-        await delay(1000);
-        const db = new sqlite3.Database('banlist.sqlite');
-        let uuidList = [];
-        
-        db.all('SELECT key FROM bandata', [], (err, rows) => {
-          if (err) {
-            console.error(err);
-          }
-          uuidList = rows.map(row => row.key);
-          if (uuidList.includes(uuid)){
-            bot.chat(`/g kick ${username} banned`);
-          } else{
-            bot.chat(`/gc Welcome to the guild ${username}! Being verified on the guild discord is now mandatory for new players. Use /g discord`);
-          }
-          db.close();
-        });
+      const username = message
+      .replace(/\[(.*?)\]/g, "")
+      .trim()
+      .split(/ +/g)[0];
+      let  uuid = await getUUID(username).catch((error) => {
+       bot.chat(`/oc [ERROR] ${error}`);
+       uuid = '0';
+      });
+      await delay(1000);
+      const db = new sqlite3.Database('banlist.sqlite');
+      let uuidList = [];
+
+      db.all('SELECT key FROM bandata', [], (err, rows) => {
+        if (err) {
+          console.error(err);
+          bot.chat(`/oc [ERROR] ${err}`);
+        }
+        uuidList = rows.map(row => row.key);
+        if (uuidList.includes(uuid)){
+          bot.chat(`/gc ${username} is permanently banned from the guild!`);
+          setTimeout(function() {
+          bot.chat(`/g kick ${username} banned`);
+          }, 700);
+        } else{
+          bot.chat(`/gc Welcome to the guild ${username}! Do not hesitate to join our discord (To get the link, you can do /g discord)`);
+        }
+        db.close();
+      });
 
       return [
         this.minecraft.broadcastHeadedEmbed({
@@ -803,8 +817,10 @@ class StateHandler extends eventHandler {
     if (match === null) {
       return {};
     }
+    const playerClean = match.groups.player.replace(/⭐/g, '');
+    const command = match.groups.command;
 
-    return match.groups;
+    return { player: playerClean, command };
   }
 
   getRankColor(message) {

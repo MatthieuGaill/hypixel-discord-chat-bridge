@@ -40,8 +40,8 @@ class RenderCommand extends minecraftCommand {
         if (!isNaN(Number(arg[1]))) {
           itemNumber = arg[1];
         } else {
-          this.send("/gc Wrong Usage: !render [name] [slot] | !render [slot]");
-          return;
+          return this.send("/gc Wrong Usage: !render [name] [slot] | !render [slot]");
+          
         }
       }
 

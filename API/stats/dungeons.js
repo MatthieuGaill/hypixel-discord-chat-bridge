@@ -51,22 +51,41 @@ module.exports = (player, profile) => {
       ? `F${catacombs?.highest_tier_completed}`
       : null;
 
-    const perks = {
-      catacombs_boss_luck: profile?.perks.catacombs_boss_luck ?? 0,
-      catacombs_looting: profile?.perks.catacombs_looting ?? 0,
-      catacombs_intelligence: profile?.perks.catacombs_intelligence ?? 0,
-      catacombs_health: profile?.perks.catacombs_health ?? 0,
-      catacombs_strength: profile?.perks.catacombs_strength ?? 0,
-      catacombs_crit_damage: profile?.perks.catacombs_crit_damage ?? 0,
-      catacombs_defense: profile?.perks.catacombs_defense ?? 0,
-      permanent_speed: profile?.perks.permanent_defense ?? 0,
-      permanent_intelligence: profile?.perks.permanent_intelligence ?? 0,
-      permanent_health: profile?.perks.permanent_health ?? 0,
-      permanent_defense: profile?.perks.permanent_defense ?? 0,
-      permanent_strength: profile?.perks.permanent_strength ?? 0,
-      forbidden_blessing: profile?.perks.forbidden_blessing ?? 0,
-      revive_stone: profile?.perks.revive_stone ?? 0,
-    };
+      let perks = {
+        catacombs_boss_luck: 0,
+        catacombs_looting: 0,
+        catacombs_intelligence: 0,
+        catacombs_health: 0,
+        catacombs_strength: 0,
+        catacombs_crit_damage: 0,
+        catacombs_defense: 0,
+        permanent_speed: 0,
+        permanent_intelligence: 0,
+        permanent_health: 0,
+        permanent_defense: 0,
+        permanent_strength: 0,
+        forbidden_blessing: 0,
+        revive_stone: 0,
+      };
+      
+    if (profile?.perks){
+      perks = {
+        catacombs_boss_luck: profile?.perks.catacombs_boss_luck ?? 0,
+        catacombs_looting: profile?.perks.catacombs_looting ?? 0,
+        catacombs_intelligence: profile?.perks.catacombs_intelligence ?? 0,
+        catacombs_health: profile?.perks.catacombs_health ?? 0,
+        catacombs_strength: profile?.perks.catacombs_strength ?? 0,
+        catacombs_crit_damage: profile?.perks.catacombs_crit_damage ?? 0,
+        catacombs_defense: profile?.perks.catacombs_defense ?? 0,
+        permanent_speed: profile?.perks.permanent_defense ?? 0,
+        permanent_intelligence: profile?.perks.permanent_intelligence ?? 0,
+        permanent_health: profile?.perks.permanent_health ?? 0,
+        permanent_defense: profile?.perks.permanent_defense ?? 0,
+        permanent_strength: profile?.perks.permanent_strength ?? 0,
+        forbidden_blessing: profile?.perks.forbidden_blessing ?? 0,
+        revive_stone: profile?.perks.revive_stone ?? 0,
+      };
+    } 
 
     return {
       selected_class: titleCase(dungeons?.selected_dungeon_class),
@@ -87,6 +106,7 @@ module.exports = (player, profile) => {
       },
     };
   } catch (error) {
+    console.log(`ERROR ERROR ERROR ${error}`)
     return null;
   }
 };

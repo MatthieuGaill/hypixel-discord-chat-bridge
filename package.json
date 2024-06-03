@@ -55,7 +55,8 @@
     "util": "^0.12.5",
     "dotenv": "^16.3.1",
     "deepl-node": "^1.11.0",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "better-sqlite3": "^10.0.0"
   },
   "devDependencies": {
     "eslint": "^8.43.0",

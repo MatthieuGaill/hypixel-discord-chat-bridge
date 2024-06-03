@@ -7,3 +7,5 @@ afkdatabase.sqlite
 banlist.sqlite
 blockwarplist.sqlite
 replist.sqlite
+autopost.sqlite
+guildinvite.sqlite

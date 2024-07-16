@@ -32,6 +32,7 @@ class MinecraftManager extends CommunicationBridge {
     require("./other/eventNotifier.js");
     require("./other/skyblockNotifier.js");
     require("./other/guildNotifier.js");
+    //require("./other/afkNotifier.js");
   }
 
   createBotConnection() {

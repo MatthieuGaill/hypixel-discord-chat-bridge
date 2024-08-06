@@ -131,9 +131,9 @@ async function getList(guild){
 }
 
   
-async function checkdonator(guild, donatorUUID){
-  const hypixelGuild = await hypixel.getGuild('name', 'Golden Legion');
-  const hypixelGuildMembers = hypixelGuild.members.map(member => member.uuid.replace(/-/g, ''));
+async function checkdonator(donatorUUID){
+  // const hypixelGuild = await hypixel.getGuild('name', 'Golden Legion');
+  // const hypixelGuildMembers = hypixelGuild.members.map(member => member.uuid.replace(/-/g, ''));
   const user = db.prepare('SELECT amount FROM donatedata WHERE uuid = ?').get(donatorUUID);
   if (!user) {
     return ["", 0];

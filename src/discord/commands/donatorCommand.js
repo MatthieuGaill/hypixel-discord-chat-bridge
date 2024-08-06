@@ -85,7 +85,7 @@ module.exports = {
           donatorUUID = dataUUIDdonator['uuid'];
         }
 
-        member_amount = await checkdonator(guild, donatorUUID)
+        const member_amount = await checkdonator(donatorUUID);
         desc = "";
         title = "";
         if (member_amount[1] <= 0){

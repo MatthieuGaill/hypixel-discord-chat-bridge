@@ -1,7 +1,7 @@
 const Database = require('better-sqlite3');
 const hypixel = require("./API/HypixelRebornAPI.js");
 const { getHypixelPlayer } = require("../../API/functions/getHypixelPlayer.js");
-const { getUsername } = require("./API/PlayerDBAPI.js");
+const { getUsername } = require("./API/mowojangAPI.js");
 
 
 const db = new Database('verify.sqlite');
@@ -28,6 +28,14 @@ async function selectentry(uuid) {
     return undefined;
 }
 
+async function selectentry_discord(discord_id) {
+    const user = db.prepare('SELECT uuid FROM verifydata WHERE discord_id = ?').get(discord_id);
+    if (user){
+        return user.uuid;
+    }
+    return undefined;
+}
+
 async function getList(){
     const rows = db.prepare('SELECT * FROM verifydata').all();
     const dataDictionary = {};
@@ -35,11 +43,11 @@ async function getList(){
     for (const row of rows) {
       uuid = row.uuid;
       user = await getUsername(uuid);
-      dataDictionary[user] = row.discordid;
+      dataDictionary[`\`${user}\``] = row.discordid;
     }
 
     return dataDictionary;
 }
 
 
-module.exports = { addentry, removeentry, selectentry, getList };
+module.exports = { addentry, removeentry, selectentry, selectentry_discord, getList };

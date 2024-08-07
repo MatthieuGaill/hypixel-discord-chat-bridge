@@ -1,5 +1,5 @@
 const minecraftCommand = require("../../contracts/minecraftCommand.js");
-const { getUUID } = require("../../contracts/API/PlayerDBAPI.js");
+const { getUUID } = require("../../contracts/API/mowojangAPI.js");
 const { checkdonator, format_amount } = require("../../contracts/donator.js");
 const hypixel = require("../../contracts/API/HypixelRebornAPI.js");
 

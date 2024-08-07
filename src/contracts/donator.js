@@ -1,7 +1,7 @@
 const Database = require('better-sqlite3');
 const hypixel = require("./API/HypixelRebornAPI.js");
 const { getHypixelPlayer } = require("../../API/functions/getHypixelPlayer.js");
-const { getUsername } = require("./API/PlayerDBAPI.js");
+const { getUsername } = require("./API/mowojangAPI.js");
 const { outputFileSync } = require('fs-promise');
 
 const db = new Database('donations.sqlite');
@@ -92,6 +92,49 @@ async function UpdateRoles(guild, donator_bool, member_id, amount){
     member.roles.remove(role_10);
   }
 }
+
+// async function UpdateRoles(member, uuid, donator_bool){
+//   const donator = db.prepare('SELECT amount FROM donatedata WHERE uuid = ?').get(uuid);
+//   const amount = donator.amount;
+//   role_1000 = "1270485871589851136";
+//   role_500 = "1270485618387980479";
+//   role_100 = "1270485437714006138";
+//   role_10 = "1270485283678191616";
+
+//   if (donator_bool){
+//     if (amount >= 1000){
+//       member.roles.add(role_1000);
+//       member.roles.remove(role_500);
+//       member.roles.remove(role_100);
+//       member.roles.remove(role_10);
+//     } else if(amount >= 500){
+//       member.roles.add(role_500);
+//       member.roles.remove(role_1000);
+//       member.roles.remove(role_100);
+//       member.roles.remove(role_10);
+//     } else if(amount >= 100){
+//       member.roles.add(role_100);
+//       member.roles.remove(role_1000);
+//       member.roles.remove(role_500);
+//       member.roles.remove(role_10);
+//     } else if(amount >= 10){
+//       member.roles.add(role_10);
+//       member.roles.remove(role_1000);
+//       member.roles.remove(role_500);
+//       member.roles.remove(role_100);
+//     } else{
+//       member.roles.remove(role_1000);
+//       member.roles.remove(role_500);
+//       member.roles.remove(role_100);
+//       member.roles.remove(role_10);
+//     }
+//   } else{
+//     member.roles.remove(role_1000);
+//     member.roles.remove(role_500);
+//     member.roles.remove(role_100);
+//     member.roles.remove(role_10);
+//   }
+// }
 
 async function addDonation(guild, donatorUUID, amount) {
     let donator = db.prepare('SELECT amount FROM donatedata WHERE uuid = ?').get(donatorUUID);

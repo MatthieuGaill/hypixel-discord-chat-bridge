@@ -14,15 +14,28 @@ class MessageHandler {
         return;
       }
 
-      const content = this.stripDiscordContent(message).trim();
-      if (content.length === 0) {
+      const discordUser = await message.guild.members.fetch(message.author.id);
+      const memberRoles = discordUser.roles.cache.map((role) => role.id);
+      if (memberRoles.some((role) => config.discord.commands.blacklistRoles.includes(role))) {
         return;
       }
+
+      const content = this.stripDiscordContent(message).trim();
+      if (content.length === 0 && message.attachments.size === 0) {
+        return;
+      }
+
+      const username = message.member.displayName ?? message.author.username;
+      if (username === undefined || username.length === 0) {
+        return;
+      }
+
+      const formattedUsername = this.formatEmojis(username);
 
       const messageData = {
         member: message.member.user,
         channel: message.channel.id,
-        username: message.member.displayName.replaceAll(" ", ""),
+        username: formattedUsername.replaceAll(" ", ""),
         message: content,
         replyingTo: await this.fetchReply(message),
         discord: message,
@@ -35,12 +48,16 @@ class MessageHandler {
 
       if (images.length > 0) {
         for (const attachment of images) {
-          const imgurLink = await uploadImage(attachment);
+          try {
+            const imgurLink = await uploadImage(attachment);
 
-          messageData.message = messageData.message.replace(attachment, imgurLink.data.link);
+            messageData.message = messageData.message.replace(attachment, imgurLink.data.link);
 
-          if (messageData.message.includes(imgurLink.data.link) === false) {
-            messageData.message += ` ${imgurLink.data.link}`;
+            if (messageData.message.includes(imgurLink.data.link) === false) {
+              messageData.message += ` ${imgurLink.data.link}`;
+            }
+          } catch (error) {
+            messageData.message += ` ${attachment}`;
           }
         }
       }
@@ -63,7 +80,8 @@ class MessageHandler {
 
       const reference = await message.channel.messages.fetch(message.reference.messageId);
 
-      const mentionedUserName = message.mentions.repliedUser.globalName ?? message.mentions.repliedUser.username;
+      const discUser = await message.guild.members.fetch(message.mentions.repliedUser.id);
+      const mentionedUserName = discUser.nickname ?? message.mentions.repliedUser.globalName;
 
       if (config.discord.other.messageMode === "bot" && reference.embed !== null) {
         const name = reference.embeds[0]?.author?.name;
@@ -132,22 +150,17 @@ class MessageHandler {
       output = output.replace(emojiMentionPattern, ":$1:");
     }
 
-    // Replace IP Adresses with [IP Address Removed]
+    // Replace IP Adresses with [Content Redacted]
     const IPAddressPattern = /(?:\d{1,3}\s*\s\s*){3}\d{1,3}/g;
-    output = output.replaceAll(IPAddressPattern, "[IP Address Removed]");
+    output = output.replaceAll(IPAddressPattern, "[Content Redacted]");
 
-    // ? demojify() function has a bug. It throws an error when it encounters channel with emoji in its name. Example: #💬・guild-chat
-    try {
-      return demojify(output);
-    } catch (e) {
-      return output;
-    }
+    return this.formatEmojis(output);
   }
 
   shouldBroadcastMessage(message) {
     const isBot =
       message.author.bot && config.discord.channels.allowedBots.includes(message.author.id) === false ? true : false;
-    const isValid = !isBot && message.content.length > 0;
+    const isValid = !isBot && (message.content.length > 0 || message.attachments.size > 0);
     const validChannelIds = [
       config.discord.channels.officerChannel,
       config.discord.channels.guildChatChannel,
@@ -155,6 +168,15 @@ class MessageHandler {
     ];
 
     return isValid && validChannelIds.includes(message.channel.id);
+  }
+
+  formatEmojis(content) {
+    // ? demojify() function has a bug. It throws an error when it encounters channel with emoji in its name. Example: #💬・guild-chat
+    try {
+      return demojify(content);
+    } catch (e) {
+      return content;
+    }
   }
 }
 

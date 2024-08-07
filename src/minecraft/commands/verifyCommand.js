@@ -26,9 +26,12 @@ class VerifyCommand extends minecraftCommand {
 
   async onCommand(username, message) {
     try {
+        if (disc){
+          throw 'Do not use from discord!'
+        }
         const discord_name = this.getArgs(message)[0];
         if (!discord_name){
-            throw `Please provide an unique discord name`;
+            throw `Please provide a unique discord name`;
         }
         const dataUUIDmc = await resolveUsernameOrUUID(username);
         if (!dataUUIDmc){

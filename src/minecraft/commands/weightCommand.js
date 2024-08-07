@@ -30,15 +30,15 @@ class StatsCommand extends minecraftCommand {
       const profile = getWeight(data.profile, data.uuid);
 
       const lilyW = `Lily Weight: ${formatNumber(profile.lily.total)} | Skills: ${formatNumber(
-        profile.lily.skills.total
+        profile.lily.skills.total,
       )} | Slayer: ${formatNumber(profile.lily.slayer.total)} | Dungeons: ${formatNumber(
-        profile.lily.catacombs?.total
+        profile.lily.catacombs.total,
       )}`;
       const senitherW = `Senither Weight: ${formatNumber(profile.senither.total)} | Skills: ${formatNumber(
         Object.keys(profile.senither.skills)
           .map((skill) => profile.senither.skills[skill].total)
-          .reduce((a, b) => a + b, 0)
-      )} | Dungeons: ${formatNumber(profile.senither.dungeons?.total)}`;
+          .reduce((a, b) => a + b, 0),
+      )} | Dungeons: ${formatNumber(profile.senither.dungeons.total)}`;
       this.send(`/gc ${username}'s ${senitherW}`);
       await delay(690);
       this.send(`/gc ${username}'s ${lilyW}`);

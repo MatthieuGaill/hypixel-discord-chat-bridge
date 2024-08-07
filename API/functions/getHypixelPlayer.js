@@ -21,7 +21,7 @@ async function getHypixelPlayer(uuid) {
     }
   }
 
-  const { data: playerRes } = await axios.get(`https://api.hypixel.net/player?key=${config.minecraft.API.hypixelAPIkey}&uuid=${uuid}`)
+  const { data: playerRes } = await axios.get(`https://api.hypixel.net/v2/player?key=${config.minecraft.API.hypixelAPIkey}&uuid=${uuid}`)
     .catch((error) => {
       throw error?.response?.data?.cause ?? "Request to Hypixel API failed. Please try again!";
     });

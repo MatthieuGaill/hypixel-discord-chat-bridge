@@ -1,3 +1,4 @@
+const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const fs = require("fs");
@@ -5,8 +6,13 @@ const fs = require("fs");
 module.exports = {
   name: "info",
   description: "Shows information about the bot.",
+  requiresBot: true,
 
   execute: async (interaction) => {
+    if (bot === undefined || bot._client.chat === undefined) {
+      throw new HypixelDiscordChatBridgeError("Bot doesn't seem to be connected to Hypixel. Please try again.");
+    }
+
     const commands = interaction.client.commands;
 
     const { discordCommands, minecraftCommands } = getCommands(commands);
@@ -33,7 +39,7 @@ module.exports = {
           }\`\nAuto Accept: \`${
             config.minecraft.guildRequirements.autoAccept ? "enabled" : "disabled"
           }\`\nGuild Experience Requirement: \`${config.minecraft.guild.guildExp.toLocaleString()}\`\nUptime: Online since <t:${Math.floor(
-            (Date.now() - client.uptime) / 1000
+            (Date.now() - client.uptime) / 1000,
           )}:R>\nVersion: \`${require("../../../package.json").version}\`\n`,
           inline: true,
         },
@@ -53,7 +59,7 @@ module.exports = {
             config.discord.other.joinMessage ? "enabled" : "disabled"
           }\``,
           inline: true,
-        }
+        },
       )
       .setFooter({
         text: "/help [command] for more information",

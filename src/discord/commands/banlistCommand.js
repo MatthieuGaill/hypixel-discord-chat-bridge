@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
-const { getUsername, resolveUsernameOrUUID } = require("../../contracts/API/PlayerDBAPI.js");
+const { getUsername, resolveUsernameOrUUID } = require("../../contracts/API/mowojangAPI.js");
 const { isUuid } =  require("../../../API/utils/uuid.js");
 
 

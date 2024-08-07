@@ -2,14 +2,15 @@ const { replaceAllRanks, replaceVariables } = require("../../contracts/helperFun
 const { getLatestProfile } = require("../../../API/functions/getLatestProfile.js");
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const hypixel = require("../../contracts/API/HypixelRebornAPI.js");
-const { getUUID } = require("../../contracts/API/PlayerDBAPI.js");
+const { getUUID, getUsername } = require("../../contracts/API/mowojangAPI.js");
 const eventHandler = require("../../contracts/EventHandler.js");
 const getWeight = require("../../../API/stats/weight.js");
 const messages = require("../../../messages.json");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const Logger = require("../../Logger.js");
-const sqlite3 = require('sqlite3');
+const { readFileSync } = require("fs");
+const { isUuid } = require("../../../API/utils/uuid.js");
 
 class StateHandler extends eventHandler {
   constructor(minecraft, command, discord) {
@@ -43,6 +44,7 @@ class StateHandler extends eventHandler {
     //   this.send(`/g mute ${username} 5m`);
     // }
 
+
     if (config.discord.channels.debugMode === true) {
       this.minecraft.broadcastMessage({
         fullMessage: colouredMessage,
@@ -51,8 +53,8 @@ class StateHandler extends eventHandler {
       });
     }
 
-    if (this.isLobbyJoinMessage(message)) {
-      // return bot.chat("\u00a7");
+    if (this.isLobbyJoinMessage(message) && config.discord.other.autoLimbo === true) {
+      return bot.chat("/limbo");
     }
 
     if (this.isPartyMessage(message) && config.minecraft.fragBot.enabled === true) {
@@ -87,14 +89,15 @@ class StateHandler extends eventHandler {
 
     if (this.isRequestMessage(message)) {
       const username = replaceAllRanks(
-        message.split("has")[0].replaceAll("-----------------------------------------------------\n", "")
+        message.split("has")[0].replaceAll("-----------------------------------------------------\n", ""),
       );
       const uuid = await getUUID(username);
       if (config.minecraft.guildRequirements.enabled) {
         const [player, profile] = await Promise.all([hypixel.getPlayer(uuid), getLatestProfile(uuid)]);
         let meetRequirements = false;
 
-        const weight = getWeight(profile.profile, profile.uuid)?.weight?.senither?.total || 0;
+        const weightData = getWeight(profile.profile, profile.uuid);
+        const weight = weightData?.senither?.total || 0;
         const skyblockLevel = (profile.profile?.leveling?.experience || 0) / 100 ?? 0;
 
         const bwLevel = player.stats.bedwars.level;
@@ -106,40 +109,63 @@ class StateHandler extends eventHandler {
         const duelsWins = player.stats.duels.wins;
         const dWLR = player.stats.duels.WLRatio;
 
-        if (weight > config.minecraft.guildRequirements.requirements.senitherWeight) {
+        if (
+          weight > config.minecraft.guildRequirements.requirements.senitherWeight &&
+          config.minecraft.guildRequirements.requirements.senitherWeight > 0
+        ) {
           meetRequirements = true;
         }
 
-        if (skyblockLevel > config.minecraft.guildRequirements.requirements.skyblockLevel) {
+        if (
+          skyblockLevel > config.minecraft.guildRequirements.requirements.skyblockLevel &&
+          config.minecraft.guildRequirements.requirements.skyblockLevel > 0
+        ) {
           meetRequirements = true;
         }
 
-        if (bwLevel > config.minecraft.guildRequirements.requirements.bedwarsStars) {
+        if (
+          bwLevel > config.minecraft.guildRequirements.requirements.bedwarsStars &&
+          config.minecraft.guildRequirements.requirements.bedwarsStars > 0
+        ) {
           meetRequirements = true;
         }
         if (
           bwLevel > config.minecraft.guildRequirements.requirements.bedwarsStarsWithFKDR &&
-          bwFKDR > config.minecraft.guildRequirements.requirements.bedwarsFKDR
+          bwFKDR > config.minecraft.guildRequirements.requirements.bedwarsFKDR &&
+          config.minecraft.guildRequirements.requirements.bedwarsStarsWithFKDR > 0 &&
+          config.minecraft.guildRequirements.requirements.bedwarsFKDR > 0
         ) {
           meetRequirements = true;
         }
 
-        if (swLevel > config.minecraft.guildRequirements.requirements.skywarsStars) {
+        if (
+          swLevel > config.minecraft.guildRequirements.requirements.skywarsStars &&
+          config.minecraft.guildRequirements.requirements.skywarsStars > 0
+        ) {
           meetRequirements = true;
         }
+
         if (
           swLevel > config.minecraft.guildRequirements.requirements.skywarsStarsWithKDR &&
-          swKDR > config.minecraft.guildRequirements.requirements.skywarsStarsWithKDR
+          swKDR > config.minecraft.guildRequirements.requirements.skywarsStarsWithKDR &&
+          config.minecraft.guildRequirements.requirements.skywarsStarsWithKDR > 0 &&
+          config.minecraft.guildRequirements.requirements.skywarsStars > 0
         ) {
           meetRequirements = true;
         }
 
-        if (duelsWins > config.minecraft.guildRequirements.requirements.duelsWins) {
+        if (
+          duelsWins > config.minecraft.guildRequirements.requirements.duelsWins &&
+          config.minecraft.guildRequirements.requirements.duelsWins > 0
+        ) {
           meetRequirements = true;
         }
+
         if (
           duelsWins > config.minecraft.guildRequirements.requirements.duelsWinsWithWLR &&
-          dWLR > config.minecraft.guildRequirements.requirements.duelsWinsWithWLR
+          dWLR > config.minecraft.guildRequirements.requirements.duelsWinsWithWLR &&
+          config.minecraft.guildRequirements.requirements.duelsWinsWithWLR > 0 &&
+          config.minecraft.guildRequirements.requirements.duelsWins > 0
         ) {
           meetRequirements = true;
         }
@@ -149,7 +175,7 @@ class StateHandler extends eventHandler {
             player.stats.bedwars.level
           }✫] FKDR: ${player.stats.bedwars.finalKDRatio} | [SW] [${player.stats.skywars.level}✫] KDR: ${
             player.stats.skywars.KDRatio
-          } | [Duels] Wins: ${player.stats.duels.wins.toLocaleString()} WLR: ${player.stats.duels.WLRatio.toLocaleString()} | SB Weight: ${weight.toLocaleString()} | SB Level: ${skyblockLevel.toLocaleString()}`
+          } | [Duels] Wins: ${player.stats.duels.wins.toLocaleString()} WLR: ${player.stats.duels.WLRatio.toLocaleString()} | SB Weight: ${weight.toLocaleString()} | SB Level: ${skyblockLevel.toLocaleString()}`,
         );
         await delay(1000);
 
@@ -202,7 +228,7 @@ class StateHandler extends eventHandler {
                 name: "Skyblock Level",
                 value: `${skyblockLevel.toLocaleString()}`,
                 inline: true,
-              }
+              },
             )
             .setThumbnail(`https://www.mc-heads.net/avatar/${player.nickname}`)
             .setFooter({
@@ -243,34 +269,16 @@ class StateHandler extends eventHandler {
 
     if (this.isJoinMessage(message)) {
       const username = message
-      .replace(/\[(.*?)\]/g, "")
-      .trim()
-      .split(/ +/g)[0];
-      let  uuid = await getUUID(username).catch((error) => {
-       bot.chat(`/oc [ERROR] ${error}`);
-       uuid = '0';
-      });
+        .replace(/\[(.*?)\]/g, "")
+        .trim()
+        .split(/ +/g)[0];
       await delay(1000);
-      const db = new sqlite3.Database('banlist.sqlite');
-      let uuidList = [];
-
-      db.all('SELECT key FROM bandata', [], (err, rows) => {
-        if (err) {
-          console.error(err);
-          bot.chat(`/oc [ERROR] ${err}`);
-        }
-        uuidList = rows.map(row => row.key);
-        if (uuidList.includes(uuid)){
-          bot.chat(`/gc ${username} is permanently banned from the guild!`);
-          setTimeout(function() {
-          bot.chat(`/g kick ${username} banned`);
-          }, 700);
-        } else{
-          bot.chat(`/gc Welcome to the guild ${username}! Do not hesitate to join our discord (To get the link, you can do /g discord)`);
-        }
-        db.close();
-      });
-
+      bot.chat(
+        `/gc ${replaceVariables(messages.guildJoinMessage, {
+          prefix: config.minecraft.bot.prefix,
+        })} `,
+      );
+      await this.updateUser(username);
       return [
         this.minecraft.broadcastHeadedEmbed({
           message: replaceVariables(messages.joinMessage, { username }),
@@ -294,7 +302,7 @@ class StateHandler extends eventHandler {
         .replace(/\[(.*?)\]/g, "")
         .trim()
         .split(/ +/g)[0];
-
+      await this.updateUser(username);
       return [
         this.minecraft.broadcastHeadedEmbed({
           message: replaceVariables(messages.leaveMessage, { username }),
@@ -318,7 +326,7 @@ class StateHandler extends eventHandler {
         .replace(/\[(.*?)\]/g, "")
         .trim()
         .split(/ +/g)[0];
-
+      await this.updateUser(username);
       return [
         this.minecraft.broadcastHeadedEmbed({
           message: replaceVariables(messages.kickMessage, { username }),
@@ -348,6 +356,7 @@ class StateHandler extends eventHandler {
         .split(" to ")
         .pop()
         .trim();
+      await this.updateUser(username);
       return [
         this.minecraft.broadcastCleanEmbed({
           message: replaceVariables(messages.promotionMessage, {
@@ -379,6 +388,7 @@ class StateHandler extends eventHandler {
         .split(" to ")
         .pop()
         .trim();
+      await this.updateUser(username);
       return [
         this.minecraft.broadcastCleanEmbed({
           message: replaceVariables(messages.demotionMessage, {
@@ -746,7 +756,6 @@ class StateHandler extends eventHandler {
         channel: 'Guild' 
       })  
     }*/
-
     const regex =
       config.discord.other.messageMode === "minecraft"
         ? /^(?<chatType>§[0-9a-fA-F](Guild|Officer)) > (?<rank>§[0-9a-fA-F](?:\[.*?\])?)?\s*(?<username>[^§\s]+)\s*(?:(?<guildRank>§[0-9a-fA-F](?:\[.*?\])?))?\s*§f: (?<message>.*)/
@@ -790,16 +799,22 @@ class StateHandler extends eventHandler {
   isDiscordMessage(message) {
     const isDiscordMessage = /^(?<username>(?!https?:\/\/)[^\s»:>]+)\s*[»:>]\s*(?<message>.*)/;
 
+    const match = message.match(isDiscordMessage);
+    if (match && ["Party", "Guild", "Officer"].includes(match.groups.username)) {
+      return false;
+    }
+
     return isDiscordMessage.test(message);
   }
 
   isCommand(message) {
+    const message2 = message.replace(/:star:/g, '');
     const regex = new RegExp(`^(?<prefix>[${config.minecraft.bot.prefix}-])(?<command>\\S+)(?:\\s+(?<args>.+))?\\s*$`);
 
-    if (regex.test(message) === false) {
+    if (regex.test(message2) === false) {
       const getMessage = /^(?<username>(?!https?:\/\/)[^\s»:>]+)\s*[»:>]\s*(?<message>.*)/;
 
-      const match = message.match(getMessage);
+      const match = message2.match(getMessage);
       if (match === null || match.groups.message === undefined) {
         return false;
       }
@@ -807,20 +822,18 @@ class StateHandler extends eventHandler {
       return regex.test(match.groups.message);
     }
 
-    return regex.test(message);
+    return regex.test(message2);
   }
 
   getCommandData(message) {
     const regex = /^(?<player>[^\s»:>\s]+(?:\s+[^\s»:>\s]+)*)\s*[»:>\s]\s*(?<command>.*)/;
 
-    const match = message.match(regex);
+    const message2 = message.replace(/:star:/g, '');
+    const match = message2.match(regex);
     if (match === null) {
       return {};
     }
-    const playerClean = match.groups.player.replace(/⭐/g, '');
-    const command = match.groups.command;
-
-    return { player: playerClean, command };
+    return match.groups;
   }
 
   getRankColor(message) {
@@ -918,7 +931,7 @@ class StateHandler extends eventHandler {
       (message.includes("You must be the Guild Master to use that command!") ||
         message.includes("You do not have permission to use this command!") ||
         message.includes(
-          "I'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error."
+          "I'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error.",
         ) ||
         message.includes("You cannot mute a guild member with a higher guild rank!") ||
         message.includes("You cannot kick this player!") ||
@@ -1058,6 +1071,37 @@ class StateHandler extends eventHandler {
       default:
         return "#FFFFFF";
     }
+  }
+
+  async updateUser(player) {
+    // try {
+    //   if (isUuid(player) === false) {
+    //     player = await getUsername(player);
+    //   }
+
+    //   if (config.verification.enabled === false) {
+    //     return;
+    //   }
+
+    //   const linkedData = readFileSync("data/linked.json");
+    //   if (linkedData === undefined) {
+    //     return;
+    //   }
+    //   const linked = JSON.parse(linkedData);
+    //   if (linked === undefined) {
+    //     return;
+    //   }
+
+    //   const linkedUser = linked.find((user) => user.uuid === player);
+    //   if (linkedUser === undefined) {
+    //     return;
+    //   }
+
+    //   const user = await guild.members.fetch(linkedUser.id);
+    //   await updateRolesCommand.execute(null, user);
+    // } catch {
+    //   //
+    // }
   }
 }
 

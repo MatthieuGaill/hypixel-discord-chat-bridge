@@ -22,7 +22,7 @@ class HelpCommand extends minecraftCommand {
     try {
       if (this.getArgs(message).length === 0) {
         this.send('/gc Please Provide name of a command!')
-        //this.send(`/gc https://imgur.com/I7Icb64`);
+        //this.send(`/gc https://i.imgur.com/I7Icb64`);
       } else {
         let command = this.getArgs(message)[0]
         const commandInstances = fs.readdirSync("./src/minecraft/commands")

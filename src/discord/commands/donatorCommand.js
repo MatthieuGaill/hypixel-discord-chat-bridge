@@ -3,7 +3,7 @@ const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js")
 const { getList, checkdonator, format_amount } = require("../../contracts/donator.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
-const { resolveUsernameOrUUID} = require("../../contracts/API/PlayerDBAPI.js");
+const { resolveUsernameOrUUID} = require("../../contracts/API/mowojangAPI.js");
 const { isUuid } =  require("../../../API/utils/uuid.js");
 
 

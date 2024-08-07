@@ -9,8 +9,6 @@ const config = require("../../config.json");
 const Logger = require(".././Logger.js");
 const path = require("node:path");
 const fs = require("fs");
-//const cron = require('node-cron');
-const { CronJob } = require('cron');
 
 class DiscordManager extends CommunicationBridge {
   constructor(app) {
@@ -42,6 +40,10 @@ class DiscordManager extends CommunicationBridge {
 
     for (const file of commandFiles) {
       const command = require(`./commands/${file}`);
+      // if (command.verificationCommand === true && config.verification.enabled === false) {
+      //   continue;
+      // }
+
       client.commands.set(command.name, command);
     }
 
@@ -56,7 +58,6 @@ class DiscordManager extends CommunicationBridge {
         : client.on(event.name, (...args) => event.execute(...args));
     }
 
-    this.setupScheduler();
 
     process.on("SIGINT", async () => {
       await this.stateHandler.onClose();
@@ -64,56 +65,6 @@ class DiscordManager extends CommunicationBridge {
       process.kill(process.pid, "SIGTERM");
     });
   }
-
-  setupScheduler() {
-    // Schedule the 'afk' command to run every day at midnight in Paris timezone
-    //const timezone = 'Europe/Paris'; // Use Paris timezone
-     // Replace with the ID of the channel where you want to send the afk command
-    const channelId = '821482920509833246';
-  
-    //const scheduledJob = new CronJob('12 18 * * *', async () => {
-    setInterval(async () => { 
-      
-      console.log('Running scheduled afk command');
-  
-      const afkCommand = client.commands.get('updateafk');
-      if (!afkCommand) {
-        console.error('AFK command not found!');
-        return;
-      }
-      const channel1 = await client.channels.fetch("1100048976599863357");
-      const channel2 = await client.channels.fetch(channelId);
-      if (!channel1 || !channel2) {
-        console.error('Channel not found!');
-        return;
-      }
-  
-      // Create a mock interaction object
-      const interaction = {
-        client: client,
-        channel1: channel1,
-        channel2: channel2,
-        options: {
-          getString: (name) => null,
-        },
-        followUp: async (response) => {
-          //console.log(response); // For debugging, replace this with actual logic if needed
-          await channel2.send(response); // Send the response to the channel
-        },
-      };
-  
-      try {
-        await afkCommand.execute(interaction);
-      } catch (error) {
-        console.error('Error executing afk command:', error);
-      }
-    }, 86400000);
-  }
-    // }, null, true, timezone);
-  
-    // scheduledJob.start();
-  //}
-  
 
   async getWebhook(discord, type) {
     const channel = await this.stateHandler.getChannel(type);
@@ -144,7 +95,7 @@ class DiscordManager extends CommunicationBridge {
     if (message !== undefined && chat !== "debugChannel") {
       Logger.broadcastMessage(
         `${username} [${guildRank.replace(/§[0-9a-fk-or]/g, "").replace(/^\[|\]$/g, "")}]: ${message}`,
-        `Discord`
+        `Discord`,
       );
     }
 
@@ -281,7 +232,7 @@ class DiscordManager extends CommunicationBridge {
           return;
         }
 
-        this.app.discord.webhook = await this.getWebhook(this.app.discord, channel);
+        this.app.discord.webhook = await this.getWebhook(this.app.discord, "Guild");
         this.app.discord.webhook.send({
           username: username,
           avatarURL: `https://www.mc-heads.net/avatar/${username}`,

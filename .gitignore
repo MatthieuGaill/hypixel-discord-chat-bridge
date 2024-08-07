@@ -4,3 +4,5 @@ config.json
 auth-cache/
 .env
 *.sqlite
+logs/
+data/

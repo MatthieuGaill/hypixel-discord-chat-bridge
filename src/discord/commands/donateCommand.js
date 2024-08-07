@@ -8,7 +8,7 @@ const {
     ButtonStyle,
   } = require ("discord.js");
 const { addDonation } = require("../../contracts/donator.js");
-const { getUsername, resolveUsernameOrUUID } = require("../../contracts/API/PlayerDBAPI.js");
+const { getUsername, resolveUsernameOrUUID } = require("../../contracts/API/mowojangAPI.js");
 const { isUuid } =  require("../../../API/utils/uuid.js");
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 

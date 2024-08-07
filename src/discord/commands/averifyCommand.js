@@ -102,7 +102,7 @@ module.exports = {
             const embed = new EmbedBuilder()
             .setColor(2067276)
             .setAuthor({name :`Donation manually added`})
-            .setDescription(`Linked ${mcusername} to <@${discord_id}>`)
+            .setDescription(`Linked \`${mcusername}\` to <@${discord_id}>`)
             .setFooter({
                 text: 'Link Tool',
                 iconURL: "https://i.imgur.com/Fc2R9Z9.png",
@@ -129,7 +129,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                 .setColor(16777215)
                 .setAuthor({ name: "Info" })
-                .setDescription(`${mcusername} linked to <@${d_id}>`)
+                .setDescription(`\`${mcusername}\` linked to <@${d_id}>`)
                 .setFooter({
                     text: 'Link Tool',
                     iconURL: "https://i.imgur.com/Fc2R9Z9.png",
@@ -139,7 +139,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                 .setColor(16777215)
                 .setAuthor({ name: "Info" })
-                .setDescription(`${mcusername} isn't linked`)
+                .setDescription(`\`${mcusername}\` isn't linked`)
                 .setFooter({
                     text: 'Link Tool',
                     iconURL: "https://i.imgur.com/Fc2R9Z9.png",

@@ -82,7 +82,7 @@ module.exports = {
           const embed = new EmbedBuilder()
           .setColor(2067276)
           .setTitle("Success")
-          .setDescription(`Successfully linked ${mcusername} to <@${user.id}>`)
+          .setDescription(`Successfully linked \`${mcusername}\` to <@${user.id}>`)
           .setFooter({
             text: 'Link Tool',
             iconURL: "https://i.imgur.com/Fc2R9Z9.png",

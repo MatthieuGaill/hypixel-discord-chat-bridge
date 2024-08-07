@@ -27,6 +27,10 @@ class CommunicationBridge {
     return this.bridge.onBroadcastHeadedEmbed(event);
   }
 
+  BroadcastDonationRequest(event) {
+    return this.bridge.onBroadcastDonationRequest(event);
+  }
+
   connect() {
     throw new Error("Communication bridge connection is not implemented yet!");
   }

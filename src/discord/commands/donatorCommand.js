@@ -33,7 +33,7 @@ module.exports = {
   ],
   
   execute: async (interaction) => {
-    //const user = interaction.member;
+    const user = interaction.member;
     const guild = interaction.guild;
     if (
       config.discord.commands.checkPerms === true &&
@@ -71,7 +71,6 @@ module.exports = {
             text: 'Donation Tool',
             iconURL: "https://i.imgur.com/Fc2R9Z9.png",
         });
-        console.log("End");
         await interaction.followUp( {embeds: [embed]});
       
       } else if (action==="info"){
@@ -114,7 +113,7 @@ module.exports = {
 
       
     } catch(e){
-        console.error(e);
+        //console.error(e);
         throw new HypixelDiscordChatBridgeError(`${e}`);
     }
 

@@ -16,7 +16,7 @@ const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js")
   
 module.exports = {
     name: "donate",
-    description: "Request afk form",
+    description: "Request a donation (in Million coins)",
     disabled: false,
     debug: false,
     options: [
@@ -83,7 +83,6 @@ module.exports = {
                 { name: "Comment :book:", value: comment !== undefined ? comment : "N/A" },
             ];
 
-            console.log(fields);
             const embed = new EmbedBuilder()
                 .setColor("Gold")
                 .setTitle(":bank: Donation Request")
@@ -125,7 +124,7 @@ module.exports = {
                     embed
                         .setColor("Green")
                         .setFooter({
-                        text: `Confirmed at`,
+                        text: `${action.user.username} confirmed at`,
                         iconURL: action.user.avatarURL(),
                         })
                         .setTimestamp(Date.now()),
@@ -139,7 +138,7 @@ module.exports = {
                     embed
                         .setColor("Red")
                         .setFooter({
-                        text: `Denied at`,
+                        text: `${action.user.username} denied at`,
                         iconURL: action.user.avatarURL(),
                         })
                         .setTimestamp(Date.now()),

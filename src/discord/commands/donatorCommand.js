@@ -113,7 +113,7 @@ module.exports = {
 
       
     } catch(e){
-        //console.error(e);
+        console.error(e);
         throw new HypixelDiscordChatBridgeError(`${e}`);
     }
 

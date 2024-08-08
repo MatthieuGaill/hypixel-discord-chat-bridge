@@ -27,18 +27,23 @@ module.exports = {
     db.prepare('CREATE TABLE IF NOT EXISTS afkdata (key TEXT PRIMARY KEY, user TEXT NOT NULL, date TEXT, reason TEXT)').run();
 
     //const guild = interaction.guild;
-    //const channel = guild.channels.cache.get("1100048976599863357");
+    
     //const channel = interaction.client.channels.fetch("1100048976599863357");
-    const channel = interaction.channel1;
-    const delete_id = interaction.options.getString("delete_id");
+
+    //const channel = interaction.channel1;
+    const channel = guild.channels.cache.get("1100048976599863357");
+
     try {
-      if (delete_id) {
-        const row = db.prepare('SELECT key FROM afkdata WHERE key = ?').get(delete_id);
-        if (row) {
-          const delete_Message = await channel.messages.fetch(row.key);
-          delete_Message.delete();
+      if (!interaction.options){
+        const delete_id = interaction.options.getString("delete_id");
+        if (delete_id) {
+          const row = db.prepare('SELECT key FROM afkdata WHERE key = ?').get(delete_id);
+          if (row) {
+            const delete_Message = await channel.messages.fetch(row.key);
+            delete_Message.delete();
+          }
+          db.prepare('DELETE FROM afkdata WHERE key = ?').run(delete_id);
         }
-        db.prepare('DELETE FROM afkdata WHERE key = ?').run(delete_id);
       }
 
       const newEmbed = new EmbedBuilder()
@@ -59,7 +64,13 @@ module.exports = {
       db.prepare('DELETE FROM afkdata WHERE date < ?').run(date_now);
 
       const embed = await getList(db);
-      await interaction.followUp({ embeds: [embed] });
+      if (interaction === null){
+        const channel2 = guild.channels.cache.get("821482920509833246");
+        channel2.send({ embeds: [embed] });
+      } else{
+        await interaction.followUp({ embeds: [embed] });
+      }
+      
 
     } catch (error) {
       console.error('Error in processRows:', error);

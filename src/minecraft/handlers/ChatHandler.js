@@ -1,16 +1,18 @@
 const { replaceAllRanks, replaceVariables } = require("../../contracts/helperFunctions.js");
 const { getLatestProfile } = require("../../../API/functions/getLatestProfile.js");
+const updateRolesCommand = require("../../discord/commands/updateCommand.js");
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const hypixel = require("../../contracts/API/HypixelRebornAPI.js");
-const { getUUID, getUsername } = require("../../contracts/API/mowojangAPI.js");
+const { getUUID } = require("../../contracts/API/mowojangAPI.js");
 const eventHandler = require("../../contracts/EventHandler.js");
 const getWeight = require("../../../API/stats/weight.js");
+const { isUuid } = require("../../../API/utils/uuid.js");
 const messages = require("../../../messages.json");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const Logger = require("../../Logger.js");
 const { readFileSync } = require("fs");
-const { isUuid } = require("../../../API/utils/uuid.js");
+
 
 class StateHandler extends eventHandler {
   constructor(minecraft, command, discord) {
@@ -275,7 +277,7 @@ class StateHandler extends eventHandler {
       await delay(1000);
       bot.chat(
         `/gc ${replaceVariables(messages.guildJoinMessage, {
-          prefix: config.minecraft.bot.prefix,
+          username: username,
         })} `,
       );
       await this.updateUser(username);
@@ -756,6 +758,7 @@ class StateHandler extends eventHandler {
         channel: 'Guild' 
       })  
     }*/
+
     const regex =
       config.discord.other.messageMode === "minecraft"
         ? /^(?<chatType>§[0-9a-fA-F](Guild|Officer)) > (?<rank>§[0-9a-fA-F](?:\[.*?\])?)?\s*(?<username>[^§\s]+)\s*(?:(?<guildRank>§[0-9a-fA-F](?:\[.*?\])?))?\s*§f: (?<message>.*)/
@@ -808,9 +811,8 @@ class StateHandler extends eventHandler {
   }
 
   isCommand(message) {
-    const message2 = message.replace(/:star:/g, '');
     const regex = new RegExp(`^(?<prefix>[${config.minecraft.bot.prefix}-])(?<command>\\S+)(?:\\s+(?<args>.+))?\\s*$`);
-
+    const message2 = message.replace(/:star:/g, '');
     if (regex.test(message2) === false) {
       const getMessage = /^(?<username>(?!https?:\/\/)[^\s»:>]+)\s*[»:>]\s*(?<message>.*)/;
 
@@ -827,12 +829,12 @@ class StateHandler extends eventHandler {
 
   getCommandData(message) {
     const regex = /^(?<player>[^\s»:>\s]+(?:\s+[^\s»:>\s]+)*)\s*[»:>\s]\s*(?<command>.*)/;
-
     const message2 = message.replace(/:star:/g, '');
     const match = message2.match(regex);
     if (match === null) {
       return {};
     }
+
     return match.groups;
   }
 
@@ -1074,34 +1076,34 @@ class StateHandler extends eventHandler {
   }
 
   async updateUser(player) {
-    // try {
-    //   if (isUuid(player) === false) {
-    //     player = await getUsername(player);
-    //   }
+    try {
+      if (isUuid(player) === false) {
+        player = await getUUID(player);
+      }
 
-    //   if (config.verification.enabled === false) {
-    //     return;
-    //   }
+      if (config.verification.enabled === false) {
+        return;
+      }
 
-    //   const linkedData = readFileSync("data/linked.json");
-    //   if (linkedData === undefined) {
-    //     return;
-    //   }
-    //   const linked = JSON.parse(linkedData);
-    //   if (linked === undefined) {
-    //     return;
-    //   }
+      const linkedData = readFileSync("data/linked.json");
+      if (linkedData === undefined) {
+        return;
+      }
+      const linked = JSON.parse(linkedData);
+      if (linked === undefined) {
+        return;
+      }
 
-    //   const linkedUser = linked.find((user) => user.uuid === player);
-    //   if (linkedUser === undefined) {
-    //     return;
-    //   }
+      const linkedUser = Object.values(linked).find((u) => player)
+      if (linkedUser === undefined) {
+        return;
+      }
 
-    //   const user = await guild.members.fetch(linkedUser.id);
-    //   await updateRolesCommand.execute(null, user);
-    // } catch {
-    //   //
-    // }
+      const user = await guild.members.fetch(linkedUser);
+      await updateRolesCommand.execute(null, user);
+    } catch {
+      //
+    }
   }
 }
 

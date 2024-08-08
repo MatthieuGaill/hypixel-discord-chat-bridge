@@ -1,120 +1,141 @@
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
-const { addentry, selectentry } = require("../../contracts/verify.js");
-const { checkdonator, UpdateRoles } = require("../../contracts/donator.js");
-const Database = require('better-sqlite3');
-const { EmbedBuilder } = require("discord.js");
+const hypixelRebornAPI = require("../../contracts/API/HypixelRebornAPI.js");
+const { writeFileSync, readFileSync } = require("fs");
 const config = require("../../../config.json");
-const { getUsername, resolveUsernameOrUUID } = require("../../contracts/API/PlayerDBAPI.js");
-const { isUuid } =  require("../../../API/utils/uuid.js");
-
-const db0 = new Database('verify_tmp.sqlite');
-db0.exec(`CREATE TABLE IF NOT EXISTS verifydata (
-  uuid TEXT PRIMARY KEY,
-  discordid TEXT
-)`);
-
+const { EmbedBuilder } = require("discord.js");
 
 module.exports = {
-  name: "link",
-  description: "Link your discord to your minecraft username!",
+  name: "verify",
+  description: "Connect your Discord account to Minecraft",
+  verificationCommand: true,
   options: [
     {
-      name: "minecraft_username",
-      description: "In-game name (or UUID)",
+      name: "name",
+      description: "Minecraft Username",
       type: 3,
-      required:true,
+      required: true,
     },
-
   ],
-  
-  execute: async (interaction) => {
-    const user = interaction.member;
-    const guild = interaction.guild;
-    if (
-      config.discord.commands.checkPerms === true &&
-      !(user.roles.cache.has(config.discord.commands.commandRole) || config.discord.commands.users.includes(user.id))
-    ) {
-      throw new HypixelDiscordChatBridgeError("You do not have permission to use this command.");
-    }
 
-    const mc = interaction.options.getString("minecraft_username")
-    let mcUUID= " ";
-    let mcusername= " ";
-    if (isUuid(mc)){
-        mcusername = await getUsername(mc);
-    } else{
-        const dataUUIDmc = await resolveUsernameOrUUID(mc);
-        if (!dataUUIDmc){
-            throw `Mc username/UUID does not exist`;
-        }
-        mcUUID = dataUUIDmc['uuid'];
-        mcusername = dataUUIDmc['username'];
-    }
-
+  execute: async (interaction, user, bypassChecks = false) => {
     try {
-      const test = await selectentry(mcUUID);
-      if (test){
-        console.log("test1");
-        throw `${mcusername} already linked to <@${test}>`;
+      const linkedData = readFileSync("data/linked.json");
+      if (linkedData === undefined) {
+        throw new HypixelDiscordChatBridgeError(
+          "The linked data file does not exist. Please contact an administrator.",
+        );
       }
-      const player = await db0.prepare('SELECT discordid FROM verifydata WHERE uuid = ?').get(mcUUID);
 
-      if (player){
-        const discord_name = player.discordid
-        let discord_id = ""
-        if (user.id === discord_name){
-          discord_id = discord_name;
-        } else{
-          const member = guild.members.cache.find(m => m.user.tag === discord_name);
-          if (!member){
-            throw `Could not find the linked discord, watch for case or use your discord ID`
-          }
-          discord_id = member.id;
+      const linked = JSON.parse(linkedData);
+      if (linked === undefined) {
+        throw new HypixelDiscordChatBridgeError("The linked data file is malformed. Please contact an administrator.");
+      }
+
+      if (bypassChecks === true && user !== undefined) {
+        interaction.user = user;
+      }
+
+      if (Object.keys(linked).includes(interaction.user.id) === true) {
+        if (bypassChecks === true) {
+          delete linked[interaction.user.id];
+        } else {
+          throw new HypixelDiscordChatBridgeError(
+            "You are already linked to a Minecraft account. Please run /unverify first.",
+          );
         }
-        
-        
- 
-        if (user.id === discord_id){
-          await addentry(mcUUID, user.id);
-          const data_amount = await checkdonator(mcUUID);
-          await UpdateRoles(guild, true, user.id, data_amount[1]);
-          db0.prepare('DELETE FROM verifydata WHERE uuid = ?').run(mcUUID);      
-          const embed = new EmbedBuilder()
-          .setColor(2067276)
-          .setTitle("Success")
-          .setDescription(`Successfully linked \`${mcusername}\` to <@${user.id}>`)
+      }
+
+      const username = interaction.options.getString("name");
+      const { socialMedia, nickname, uuid } = await hypixelRebornAPI.getPlayer(username);
+      if (Object.values(linked).includes(uuid) === true) {
+        if (bypassChecks === true) {
+          delete linked[Object.keys(linked).find((key) => linked[key] === uuid)];
+        } else {
+          throw new HypixelDiscordChatBridgeError(
+            "This player is already linked to a Discord account. Please contact an administrator.",
+          );
+        }
+      }
+
+      const discordUsername = socialMedia.find((media) => media.id === "DISCORD")?.link;
+      if (discordUsername === undefined && bypassChecks !== true) {
+        throw new HypixelDiscordChatBridgeError("This player does not have a Discord linked.");
+      }
+
+      if (discordUsername !== interaction.user.username && bypassChecks !== true) {
+        throw new HypixelDiscordChatBridgeError(
+          `The player '${nickname}' has linked their Discord account to a different account ('${discordUsername}').`,
+        );
+      }
+
+      const linkedRole = guild.roles.cache.get(config.verification.verifiedRole);
+      console.log(config.verification.verifiedRole);
+      // if (linkedRole === undefined) {
+      //   throw new HypixelDiscordChatBridgeError("The verified role does not exist. Please contact an administrator.");
+      // }
+
+      linked[interaction.user.id] = uuid;
+      writeFileSync("data/linked.json", JSON.stringify(linked, null, 2));
+
+      const embed = new EmbedBuilder()
+        .setColor("4BB543")
+        .setAuthor({ name: "Successfully linked!" })
+        .setDescription(`${user ? `<@${user.id}>'s` : "Your"} account has been successfully linked to \`${nickname}\``)
+        .setFooter({
+          text: `/help [command] for more information`,
+          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+        });
+
+      await interaction.editReply({ embeds: [embed], ephemeral: true });
+
+      const updateRolesCommand = require("./updateCommand.js");
+      if (updateRolesCommand === undefined) {
+        throw new HypixelDiscordChatBridgeError("The update command does not exist. Please contact an administrator.");
+      }
+
+      await updateRolesCommand.execute(interaction);
+    } catch (error) {
+      console.log(error);
+      // eslint-disable-next-line no-ex-assign
+      error = error
+        .toString()
+        .replaceAll("Error: [hypixel-api-reborn] ", "")
+        .replaceAll(
+          "Unprocessable Entity! For help join our Discord Server https://discord.gg/NSEBNMM",
+          "This player does not exist. (Mojang API might be down)",
+        );
+
+      const errorEmbed = new EmbedBuilder()
+        .setColor(15548997)
+        .setAuthor({ name: "An Error has occurred" })
+        .setDescription(`\`\`\`${error}\`\`\``)
+        .setFooter({
+          text: `/help [command] for more information`,
+          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+        });
+
+      await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
+
+      if (
+        error !== "You are already linked to a Minecraft account. Please run /unverify first." &&
+        error.includes("linked") === true
+      ) {
+        const verificationTutorialEmbed = new EmbedBuilder()
+          .setColor(0x0099ff)
+          .setAuthor({ name: "Link with Hypixel Social Media" })
+          .setDescription(
+            `**Instructions:**\n1) Use your Minecraft client to connect to Hypixel.\n2) Once connected, and while in the lobby, right click "My Profile" in your hotbar. It is option #2.\n3) Click "Social Media" - this button is to the left of the Redstone block (the Status button).\n4) Click "Discord" - it is the second last option.\n5) Paste your Discord username into chat and hit enter. For reference: \`${
+              interaction.user.username ?? interaction.user.tag
+            }\`\n6) You're done! Wait around 30 seconds and then try again.\n\n**Getting "The URL isn't valid!"?**\nHypixel has limitations on the characters supported in a Discord username. Try changing your Discord username temporarily to something without special characters, updating it in-game, and trying again.`,
+          )
+          .setImage("https://media.discordapp.net/attachments/922202066653417512/1066476136953036800/tutorial.gif")
           .setFooter({
-            text: 'Link Tool',
+            text: `/help [command] for more information`,
             iconURL: "https://i.imgur.com/Fc2R9Z9.png",
           });
-          await interaction.followUp({embeds: [embed],});
-          
-        } else{
-          throw `Discords do not match!`;
-        }
 
-      } else{
-        throw "First, run !link [discord name] in normal guild chat on hypixel";
-
+        await interaction.followUp({ embeds: [verificationTutorialEmbed], ephemeral: true  });
       }
-      
-      
-      
-    } catch(e){
-      console.error(e);
-      const embed = new EmbedBuilder()
-      .setColor(15105570)
-      .setTitle("Error")
-      .setDescription(e)
-      .setFooter({
-        text: 'Link Tool',
-        iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-      });
-      await interaction.followUp({embeds: [embed],});
-      //throw new HypixelDiscordChatBridgeError(`${e}`);
     }
-
   },
-
 };
-

@@ -9,12 +9,23 @@ class StateHandler {
   async onReady() {
     Logger.discordMessage("Client ready, logged in as " + this.discord.client.user.tag);
     this.discord.client.user.setPresence({
-      activities: [{ name: `hypixel` }],
+      activities: [{ name: `/help ` }],
     });
 
     const channel = await this.getChannel("Guild");
     if (channel === undefined) {
       return Logger.errorMessage(`Channel "Guild" not found!`);
+    }
+
+    global.guild = await client.guilds.fetch(config.discord.bot.serverID);
+    if (guild === undefined) {
+      return Logger.errorMessage(`Guild not found!`);
+    }
+
+    Logger.discordMessage("Guild ready, successfully fetched " + guild.name);
+
+    if (config.verification.autoUpdater) {
+      require("../other/updateUsers.js");
     }
 
     channel.send({

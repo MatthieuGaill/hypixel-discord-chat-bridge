@@ -1,63 +1,52 @@
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
-const { removeentry, selectentry_discord } = require("../../contracts/verify.js");
-const { checkdonator, UpdateRoles } = require("../../contracts/donator.js");
-const { EmbedBuilder } = require("discord.js");
-const config = require("../../../config.json");
+const { SuccessEmbed } = require("../../contracts/embedHandler.js");
+const { writeFileSync, readFileSync } = require("fs");
 const { getUsername } = require("../../contracts/API/mowojangAPI.js");
-
-
+const { EmbedBuilder } = require("discord.js");
 
 module.exports = {
-  name: "unlink",
-  description: "Unlink your discord",
+  name: "unverify",
+  description: "Remove your linked Minecraft account",
+  verificationCommand: true,
 
   execute: async (interaction) => {
-    const user = interaction.member;
-    const guild = interaction.guild;
-    if (
-      config.discord.commands.checkPerms === true &&
-      !(user.roles.cache.has(config.discord.commands.commandRole) || config.discord.commands.users.includes(user.id))
-    ) {
-      throw new HypixelDiscordChatBridgeError("You do not have permission to use this command.");
-    }
-
     try {
-        const test = await selectentry_discord(user.id);
-        
-        if (!test){
-            throw `Your discord (${user.username}) is not linked to any minecraft account (Run /link to do so)`;
-        }
-        
-        const mcusername = getUsername(test);
-        await removeentry(test);
-        await UpdateRoles(guild, false, user.id, test);
+      const linkedData = readFileSync("data/linked.json");
+      if (!linkedData) {
+        throw new HypixelDiscordChatBridgeError(
+          "The linked data file does not exist. Please contact an administrator.",
+        );
+      }
 
-        const embed = new EmbedBuilder()
-          .setColor(2067276)
-          .setTitle("Success")
-          .setDescription(`Successfully unlinked \`${mcusername}\` to <@${user.id}>`)
-          .setFooter({
-            text: 'Link Tool',
-            iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-          });
-        await interaction.followUp({embeds: [embed],});
+      const linked = JSON.parse(linkedData);
+      if (!linked) {
+        throw new HypixelDiscordChatBridgeError("The linked data file is malformed. Please contact an administrator.");
+      }
 
-      
-    } catch(e){
-      console.error(e);
-      const embed = new EmbedBuilder()
-      .setColor(15105570)
-      .setTitle("Error")
-      .setDescription(e)
-      .setFooter({
-        text: 'Link Tool',
-        iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-      });
-      await interaction.followUp({embeds: [embed],});
-      //throw new HypixelDiscordChatBridgeError(`${e}`);
+      const uuid = linked[interaction.user.id];
+      if (uuid === undefined) {
+        throw new HypixelDiscordChatBridgeError(`You are not verified. Please run /verify to continue.`);
+      }
+
+      delete linked[interaction.user.id];
+      writeFileSync("data/linked.json", JSON.stringify(linked, null, 2));
+
+      const updateRole = new SuccessEmbed(
+        `You have successfully unlinked \`${await getUsername(uuid)}\`. Run \`/verify\` to link a new account.`,
+        { text: `/help [command] for more information`, iconURL: "https://i.imgur.com/Fc2R9Z9.png" },
+      );
+      await interaction.followUp({ embeds: [updateRole] });
+    } catch (error) {
+      const errorEmbed = new EmbedBuilder()
+        .setColor(15548997)
+        .setAuthor({ name: "An Error has occurred" })
+        .setDescription(`\`\`\`${error}\`\`\``)
+        .setFooter({
+          text: `/help [command] for more information`,
+          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+        });
+
+      await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
     }
-
   },
-
 };
-

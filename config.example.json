@@ -130,6 +130,21 @@
       "enabled": false,
       "port": 1439
     },
+    "verification": {
+      "enabled": false,
+      "verifiedRole": "VERIFIED_ROLE_ID",
+      "removeVerificationRole": true,
+      "guildMemberRole": "GUILD_MEMBER_ROLE_ID",
+      "autoUpdater": true,
+      "autoUpdaterInterval": 24,
+      "name": "{username}",
+      "ranks": [
+        {
+          "name": "IN_GAME_RANK_NAME",
+          "role": "DISCORD_ROLE_ID"
+        }
+      ]
+    },
     "other": {
       "autoUpdater": false,
       "autoUpdaterInterval": 12,

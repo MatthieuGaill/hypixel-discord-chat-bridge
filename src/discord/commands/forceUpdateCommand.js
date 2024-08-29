@@ -21,6 +21,7 @@ module.exports = {
       throw new HypixelDiscordChatBridgeError("The update command does not exist. Please contact an administrator.");
     }
 
+    interaction.member = undefined;
     await updateRolesCommand.execute(interaction, user);
   },
 };

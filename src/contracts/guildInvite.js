@@ -2,16 +2,37 @@ const Database = require('better-sqlite3');
 const hypixel = require("./API/HypixelRebornAPI.js");
 // const config = require("../../config.json");
 // const axios = require("axios");
-const { getHypixelPlayer } = require("../../API/functions/getHypixelPlayer.js");
+const { readFileSync } = require("fs");
 
 //const cache = new Map();
-const db = new Database('guildinvite.sqlite');
+const db = new Database('data/guildinvite.sqlite');
 db.exec(`CREATE TABLE IF NOT EXISTS invitedata (
   uuid TEXT PRIMARY KEY,
   members TEXT,
   discord TEXT
 )`);
 
+
+async function readLinked() {
+  const linkedData = readFileSync("data/linked.json");
+  if (!linkedData) {
+    return undefined;
+  }
+  const linked = JSON.parse(linkedData);
+  if (!linked) {
+    return undefined;
+  }
+  return linked;
+}
+
+async function checkdiscord(linked, uuid){
+  if (linked === undefined){
+    return undefined;
+  }
+  const discord_id = Object.keys(linked).find((key) => linked[key] === uuid);
+
+  return discord_id
+}
 
 async function addInvite(inviterUUID, invitedUUID) {
     const inviter = db.prepare('SELECT members FROM invitedata WHERE uuid = ?').get(inviterUUID);
@@ -27,58 +48,50 @@ async function addInvite(inviterUUID, invitedUUID) {
     }
 }
 
-async function getInvites(inviterUUID, hypixelGuildMembers, guild) {
-    const user = db.prepare('SELECT members FROM invitedata WHERE uuid = ?').get(inviterUUID);
+async function getInvites(inviterUUID, hypixelGuildMembers) {
+  const linked = readLinked();
+  const user = db.prepare('SELECT members FROM invitedata WHERE uuid = ?').get(inviterUUID);
 
-    if (!user) {
-    return { totalInvited: 0, invited_discord:0 };
-    }
+  if (!user) {
+  return { totalInvited: 0, invited_discord:0 };
+  }
 
-    const members = user.members ? user.members.split('/') : [];
-    const discordmemberslist = []
-    let totalInvited = 0;
-    let invited_discord = 0
+  const members = user.members ? user.members.split('/') : [];
+  const discordmemberslist = []
+  let totalInvited = 0;
+  let invited_discord = 0
 
 
-    try {
-      for (const member of members){
-        if (!hypixelGuildMembers.includes(member)){
-          await removeInvite(inviterUUID, member);
-        } else{
-          totalInvited += 1;
-          const discordname = await checkdiscord(member);
-          if (discordname) {
-            const GuildMembers = await guild.members.search({ query: discordname, limit: 1 });
-            if (GuildMembers.size > 0){
-              const GuildMember0 = GuildMembers.first();
-              if (GuildMember0.roles.cache.has("1057376971035783269")){
-                invited_discord += 1;
-                discordmemberslist.push(member);
-              }
-            }
-
-          }
+  try {
+    for (const member of members){
+      if (!hypixelGuildMembers.includes(member)){
+        await removeInvite(inviterUUID, member);
+      } else{
+        totalInvited += 1;
+        const d_id = await checkdiscord(member);
+        if (d_id) {
+          discordmemberslist.push(member);
         }
       }
-
-    db.prepare('UPDATE invitedata SET discord = ? WHERE uuid = ?').run(discordmemberslist.join('/'), inviterUUID);
-    } catch (error) {
-      console.error(error);
     }
 
-    return { totalInvited, invited_discord };
+  db.prepare('UPDATE invitedata SET discord = ? WHERE uuid = ?').run(discordmemberslist.join('/'), inviterUUID);
+  } catch (error) {
+    console.error(error);
+  }
+
+  return { totalInvited, invited_discord };
 }
 
 
 async function getList(){
-    const guild = client.guilds.cache.get("819229417796534283");
     const hypixelGuild = await hypixel.getGuild('name', 'Golden Legion');
     const hypixelGuildMembers = hypixelGuild.members.map(member => member.uuid.replace(/-/g, ''));
     const rows = db.prepare('SELECT uuid FROM invitedata').all();
     const dataDictionary = {};
 
     for (const row of rows) {
-      const tempdata = await getInvites(row.uuid, hypixelGuildMembers, guild);
+      const tempdata = await getInvites(row.uuid, hypixelGuildMembers);
       
       if (tempdata["totalInvited"] === 0){
         db.prepare('DELETE FROM invitedata WHERE uuid = ?').run(row.uuid);
@@ -121,17 +134,6 @@ async function checkdetails(inviterUUID){
   return {guild_list, discord_list};
 }
 
-async function checkdiscord(uuid){
-  const data = await getHypixelPlayer(uuid);
-
-  const socialMedia = data.socialMedia ? data.socialMedia : undefined;
-  let discordname;
-  if (socialMedia){
-    discordname = socialMedia.links.DISCORD ? socialMedia.links.DISCORD : undefined;
-  }
-  
-  return discordname;
-}
 
 
 module.exports = { addInvite, getInvites, getList, removeInvite, checkdetails };

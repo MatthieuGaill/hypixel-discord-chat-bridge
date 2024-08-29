@@ -3,6 +3,7 @@ const hypixelRebornAPI = require("../../contracts/API/HypixelRebornAPI.js");
 const { writeFileSync, readFileSync } = require("fs");
 const config = require("../../../config.json");
 const { EmbedBuilder } = require("discord.js");
+const { selectlink_discord, selectlink_uuid, removelink_discord, removelink_uuid, addlink } = require("../../contracts/verify.js");
 
 module.exports = {
   name: "verify",
@@ -19,25 +20,15 @@ module.exports = {
 
   execute: async (interaction, user, bypassChecks = false) => {
     try {
-      const linkedData = readFileSync("data/linked.json");
-      if (linkedData === undefined) {
-        throw new HypixelDiscordChatBridgeError(
-          "The linked data file does not exist. Please contact an administrator.",
-        );
-      }
-
-      const linked = JSON.parse(linkedData);
-      if (linked === undefined) {
-        throw new HypixelDiscordChatBridgeError("The linked data file is malformed. Please contact an administrator.");
-      }
 
       if (bypassChecks === true && user !== undefined) {
         interaction.user = user;
+        console.log(interaction.user.tag);
       }
-
-      if (Object.keys(linked).includes(interaction.user.id) === true) {
+      const data_uuid = await selectlink_discord(interaction.user.id);
+      if (data_uuid){
         if (bypassChecks === true) {
-          delete linked[interaction.user.id];
+          await removelink_discord(interaction.user.id);
         } else {
           throw new HypixelDiscordChatBridgeError(
             "You are already linked to a Minecraft account. Please run /unverify first.",
@@ -47,13 +38,20 @@ module.exports = {
 
       const username = interaction.options.getString("name");
       const { socialMedia, nickname, uuid } = await hypixelRebornAPI.getPlayer(username);
-      if (Object.values(linked).includes(uuid) === true) {
+      const data_discordId = await selectlink_uuid(uuid);
+      if (data_discordId){
         if (bypassChecks === true) {
-          delete linked[Object.keys(linked).find((key) => linked[key] === uuid)];
+          await removelink_uuid(uuid);
         } else {
           throw new HypixelDiscordChatBridgeError(
             "This player is already linked to a Discord account. Please contact an administrator.",
           );
+        }
+      }
+      if (bypassChecks = true){
+        const check_member = await interaction.guild.members.fetch(interaction.user.id).catch(e => null);
+        if (!check_member){
+          throw "This person is not on the guild discord server!";
         }
       }
 
@@ -62,7 +60,7 @@ module.exports = {
         throw new HypixelDiscordChatBridgeError("This player does not have a Discord linked.");
       }
 
-      if (discordUsername !== interaction.user.username && bypassChecks !== true) {
+      if (discordUsername?.toLowerCase() != interaction.user.username && bypassChecks !== true) {
         throw new HypixelDiscordChatBridgeError(
           `The player '${nickname}' has linked their Discord account to a different account ('${discordUsername}').`,
         );
@@ -70,12 +68,13 @@ module.exports = {
 
       const linkedRole = guild.roles.cache.get(config.verification.verifiedRole);
       console.log(config.verification.verifiedRole);
-      // if (linkedRole === undefined) {
-      //   throw new HypixelDiscordChatBridgeError("The verified role does not exist. Please contact an administrator.");
-      // }
+      if (linkedRole === undefined) {
+        throw new HypixelDiscordChatBridgeError("The verified role does not exist. Please contact an administrator.");
+      }
 
-      linked[interaction.user.id] = uuid;
-      writeFileSync("data/linked.json", JSON.stringify(linked, null, 2));
+      // linked[interaction.user.id] = uuid;
+      // writeFileSync("data/linked.json", JSON.stringify(linked, null, 2));
+      await addlink(uuid, interaction.user.id);
 
       const embed = new EmbedBuilder()
         .setColor("4BB543")
@@ -92,8 +91,8 @@ module.exports = {
       if (updateRolesCommand === undefined) {
         throw new HypixelDiscordChatBridgeError("The update command does not exist. Please contact an administrator.");
       }
-
-      await updateRolesCommand.execute(interaction);
+      console.log(interaction.user);
+      await updateRolesCommand.execute(interaction, interaction.user);
     } catch (error) {
       console.log(error);
       // eslint-disable-next-line no-ex-assign

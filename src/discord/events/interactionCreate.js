@@ -1,7 +1,7 @@
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { ErrorEmbed } = require("../../contracts/embedHandler.js");
 // eslint-disable-next-line no-unused-vars
-const { CommandInteraction } = require("discord.js");
+const { CommandInteraction } = require('discord.js');
 const config = require("../../../config.json");
 const Logger = require("../.././Logger.js");
 
@@ -13,6 +13,12 @@ module.exports = {
   async execute(interaction) {
     try {
       if (interaction.isChatInputCommand()) {
+        if (!interaction.guild){
+          return;
+        }
+        if (interaction.guild.id !== config.discord.bot.serverID){
+          return;
+        }
         const memberRoles = interaction.member.roles.cache.map((role) => role.id);
         await interaction.deferReply({ ephemeral: false }).catch(() => {});
         if (memberRoles.some((role) => config.discord.commands.blacklistRoles.includes(role))) {
@@ -63,7 +69,7 @@ module.exports = {
           `Command: \`${commandName}\`\nOptions: \`${commandOptions}\`\nUser ID: \`${userID}\`\nUser: \`${username}\`\n\`\`\`${errorStack}\`\`\``,
         );
         interaction.client.channels.cache.get(config.discord.channels.loggingChannel).send({
-          content: `<@&${config.discord.commands.commandRole}>`,
+          content: `<@629735859653967912>`,
           embeds: [errorLog],
         });
       }

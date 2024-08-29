@@ -1,7 +1,7 @@
-const sqlite3 = require('sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
+const { addcode, removecode, getAllcodes } = require('../../contracts/secretcodes.js');
 
 
 
@@ -51,8 +51,6 @@ module.exports = {
     ) {
       throw new HypixelDiscordChatBridgeError("You do not have permission to use this command.");
     }
-    const db = new sqlite3.Database('database.sqlite');
-    db.run('CREATE TABLE IF NOT EXISTS ticketdata (key TEXT PRIMARY KEY, value TEXT)');
 
     const [action, code_key, code_value] = [interaction.options.getString("action"), interaction.options.getString("code"), interaction.options.getString("value")];
 
@@ -60,12 +58,12 @@ module.exports = {
       if (code_key === null || code_value === null){
         throw new HypixelDiscordChatBridgeError("You must specify a code & value with add");
       }
-      
-      db.run('INSERT OR REPLACE INTO ticketdata (key, value) VALUES (?, ?)', [code_key, code_value]);
+      const code_key_func = code_key.toUpperCase().replace(/\s/g, '');
+      await addcode(code_key_func, code_value);
       const embed = new EmbedBuilder()
       .setColor(2067276)
       .setAuthor({ name: "Ticket created" })
-      .setDescription(`Successfully created code **${code_key}** with the value **${code_value}**`)
+      .setDescription(`Successfully created code **${code_key_func}** with the value **${code_value}**`)
       .setFooter({
         text: ' ',
         iconURL: "https://i.imgur.com/Fc2R9Z9.png",
@@ -77,11 +75,12 @@ module.exports = {
       if (code_key === null){
         throw new HypixelDiscordChatBridgeError("You must specify a code (to remove) with remove");
       }
-      db.run('DELETE FROM ticketdata WHERE key = ?', [code_key]);
+      const code_key_func = code_key.toUpperCase().replace(/\s/g, '');
+      await removecode(code_key_func);
       const embed = new EmbedBuilder()
       .setColor(15105570)
       .setAuthor({ name: "Ticket removed" })
-      .setDescription(`Successfully removed code **${code_key}**`)
+      .setDescription(`Successfully removed code **${code_key_func}**`)
       .setFooter({
         text: ' ',
         iconURL: "https://i.imgur.com/Fc2R9Z9.png",
@@ -90,8 +89,17 @@ module.exports = {
 
       
     } else if (action === "list"){
-      const embed = await getList(db);
-    
+
+      const verticalList = await getList();
+      const embed = new EmbedBuilder()
+      .setColor(16777215)
+      .setAuthor({ name: "Code list" })
+      .setDescription(verticalList)
+      .setFooter({
+        text: ' ',
+        iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+      });
+  
       await interaction.followUp( {embeds: [embed]});
       
     } else {
@@ -103,34 +111,20 @@ module.exports = {
 };
 
   
-async function getList(db){
+async function getList(){
   const dataDictionary = {};
-  return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM ticketdata', [], (err, rows) => {
-      if (err) {
-        //console.error(err);
-        reject(err);
-      }
-      rows.forEach((row) => { dataDictionary[row.key] = row.value;});
-      let verticalList = Object.entries(dataDictionary)
-       .map(([key, value]) => `**${key}** :  ${value}`)
-       .join('\n'); 
-      if (!verticalList){
-        verticalList = "no codes registered yet!";
-      }
-      const embed = new EmbedBuilder()
-        .setColor(16777215)
-        .setAuthor({ name: "Code list" })
-        .setDescription(verticalList)
-        .setFooter({
-          text: ' ',
-          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-      });
-      db.close();
-      resolve(embed)
+  const rows = await getAllcodes();
 
-    });
-  });
+  rows.forEach((row) => { dataDictionary[row.key] = row.value;});
+  let verticalList = Object.entries(dataDictionary)
+    .map(([key, value]) => `**${key}** :  ${value}`)
+    .join('\n');
+
+  if (!verticalList){
+    verticalList = "no codes registered yet!";
+  }
+  return verticalList;
+
 }
 
   

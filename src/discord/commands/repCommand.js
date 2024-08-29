@@ -1,7 +1,7 @@
-const sqlite3 = require('sqlite3');
 const { EmbedBuilder } = require("discord.js");
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const config = require("../../../config.json");
+const { updateDatabase } = require("../../contracts/reputation.js");
 
 
 module.exports = {
@@ -90,11 +90,8 @@ module.exports = {
         const comment = interaction.options.getString("comment");
         const add_msg = comment !== null? 
         `Successfully added a reputation to <@${member_id}>, *${choice}* (${comment})` : `Successfully added a reputation to <@${member_id}>, *${choice}* `;
-        const db = new sqlite3.Database('replist.sqlite');
-        db.run('CREATE TABLE IF NOT EXISTS repdata (key TEXT PRIMARY KEY, reputation INTEGER, typerep TEXT)');
-        const trusted = await Updatedatabase(db, member_id, choiceIndex);
+        const trusted = await updateDatabase(member_id, choiceIndex);
 
-        db.close();
 
         const embed = new EmbedBuilder()
         .setColor(2067276)
@@ -139,34 +136,3 @@ module.exports = {
   },
 
 };
-
-
-async function Updatedatabase(db, member_id, choiceIndex) {
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.get('SELECT * FROM repdata WHERE key = ?', [member_id], (err, row) => {
-    
-        if (err) {
-          console.error(err.message);
-          reject(err.message);
-        }
-        if (!row) {
-          let newType = [0,0,0,0,0,0,0,0];
-          newType[choiceIndex] = 1
-          db.run('INSERT INTO repdata (key, reputation, typerep) VALUES (?, 1, ?)', [member_id, JSON.stringify(newType)]);
-          resolve(false);
-        } else {
-          let updatedType = JSON.parse(row.typerep);
-          updatedType[choiceIndex] = updatedType[choiceIndex] + 1;
-          db.run('UPDATE repdata SET reputation = reputation + 1, typerep = ? WHERE key = ?', [JSON.stringify(updatedType), member_id]);
-
-          if (row.reputation === 9){
-            resolve(true);
-          } else{
-            resolve(false);
-          }
-        }
-      });
-    });
-  });
-}

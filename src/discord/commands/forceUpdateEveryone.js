@@ -1,6 +1,6 @@
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
-const { readFileSync, writeFileSync } = require("fs");
 const { EmbedBuilder } = require("discord.js");
+const { selectlink_discord, removelink_discord, getAllLinks } = require("../../contracts/verify.js");
 
 module.exports = {
   name: "force-update-everyone",
@@ -11,27 +11,20 @@ module.exports = {
   execute: async (interaction, doNotRespond = false) => {
     try {
       const updateRolesCommand = require("./updateCommand.js");
-      if (updateRolesCommand === undefined) {
+      if (!updateRolesCommand) {
         throw new HypixelDiscordChatBridgeError("The update command does not exist. Please contact an administrator.");
       }
 
-      const linkedData = readFileSync("data/linked.json");
-      if (linkedData === undefined) {
-        throw new HypixelDiscordChatBridgeError(
-          "The linked data file does not exist. Please contact an administrator.",
-        );
-      }
-
-      const linked = JSON.parse(linkedData);
-      if (linked === undefined) {
-        throw new HypixelDiscordChatBridgeError("The linked data file is malformed. Please contact an administrator.");
+      const allLinks = await getAllLinks();
+      if (!allLinks || allLinks.length === 0) {
+        throw new HypixelDiscordChatBridgeError("No linked data found. Please contact an administrator.");
       }
 
       if (doNotRespond === false) {
         const embed = new EmbedBuilder()
           .setColor(3447003)
           .setTitle("Updating Users")
-          .setDescription(`Progress: 0 / ${Object.keys(linked).length} (\`0%\`)`)
+          .setDescription(`Progress: 0 / ${allLinks.length} (\`0%\`)`)
           .setFooter({
             text: `/help [command] for more information`,
             iconURL: "https://i.imgur.com/Fc2R9Z9.png",
@@ -41,40 +34,42 @@ module.exports = {
       }
 
       const description = [];
-      for (const id in linked) {
-        const user = await guild.members.fetch(id).catch(() => {});
-        if (user === undefined) {
-          delete linked[id];
+      for (let i = 0; i < allLinks.length; i++) {
+        const { discordId } = allLinks[i];
+        const user = await interaction.guild.members.fetch(discordId).catch(() => {});
+
+        if (!user) {
+          await removelink_discord(discordId);
           continue;
         }
 
+        interaction.member = undefined;
         await updateRolesCommand.execute(interaction, user.user, true).catch(() => {
-          description.push(`- <@${id}>`);
+          description.push(`- <@${discordId}>`);
         });
 
-        const embed = new EmbedBuilder()
-          .setColor(3447003)
-          .setTitle("Updating Users")
-          .setDescription(
-            `Progress: ${Object.keys(linked).indexOf(id)} / ${Object.keys(linked).length} (\`${((Object.keys(linked).indexOf(id) / Object.keys(linked).length) * 100).toFixed(2)}%\`)`,
-          )
-          .setFooter({
-            text: `/help [command] for more information`,
-            iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-          });
-
         if (doNotRespond === false) {
+          const embed = new EmbedBuilder()
+            .setColor(3447003)
+            .setTitle("Updating Users")
+            .setDescription(
+              `Progress: ${i + 1} / ${allLinks.length} (\`${(((i + 1) / allLinks.length) * 100).toFixed(2)}%\`)`,
+            )
+            .setFooter({
+              text: `/help [command] for more information`,
+              iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+            });
+
           await interaction.editReply({ embeds: [embed], ephemeral: true });
         }
       }
 
-      writeFileSync("data/linked.json", JSON.stringify(linked, null, 2));
       if (doNotRespond === false) {
         if (description.length > 0) {
           description.unshift(`\n__**Failed to update:**__`);
         }
 
-        description.unshift(`Updated **${Object.keys(linked).length}** users.`);
+        description.unshift(`Updated **${allLinks.length}** users.`);
 
         const embed = new EmbedBuilder()
           .setColor(3447003)

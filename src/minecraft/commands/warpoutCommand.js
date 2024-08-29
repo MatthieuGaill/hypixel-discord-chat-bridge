@@ -1,7 +1,8 @@
 const minecraftCommand = require("../../contracts/minecraftCommand.js");
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const { getUUID } = require("../../contracts/API/PlayerDBAPI.js");
-const sqlite3 = require('sqlite3');
+const { checkblock } = require("../../contracts/blockwarp.js");
+
 
 class warpoutCommand extends minecraftCommand {
   constructor(minecraft) {
@@ -26,9 +27,10 @@ class warpoutCommand extends minecraftCommand {
         this.send(`/oc [ERROR] ${error}`);
         uuid = '0';
        });
-      const uuidL = await getAuthorization();
-      if (uuidL.includes(uuid)){
-        throw 'No permission'
+
+      const row = await checkblock(uuid);
+      if (row){
+        throw 'No permission';
       }
       await delay(500);
 
@@ -163,45 +165,7 @@ class warpoutCommand extends minecraftCommand {
   }
 }
 
-// async function getAuthorization(username){
-//    console.log(`username0 :  ${username}`)
-//    const db = new sqlite3.Database('blockwarplist.sqlite');
-//    let uuidList = [];
-//    db.all('SELECT key FROM blockwarpdata', [], (err, rows) => {
-//      if (err) {
-//        console.error(err);
-//        this.send(`/oc [ERROR] ${err}`);
-//      }
-//      uuidList = rows.map(row => row.key);
-//      //uuidList.push(row.key);
-//      db.close();
-//    });
-//    return uuidList;
-// }
 
-
-async function getAuthorization() {
-  try {
-    const db = new sqlite3.Database('blockwarplist.sqlite');
-    const rows = await new Promise((resolve, reject) => {
-      db.all('SELECT key FROM blockwarpdata', [], (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
-      });
-    });
-    db.close();
-    const uuidList = rows.map(row => row.key);
-    return uuidList;
-  } catch (error) {
-    console.error(error);
-    this.send(`/oc [ERROR] ${err}`);
-    // Handle error appropriately
-    return [];
-  }
-}
 
 
 module.exports = warpoutCommand;

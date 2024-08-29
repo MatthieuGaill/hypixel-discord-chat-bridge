@@ -66,6 +66,8 @@ class StateHandler {
         return this.discord.client.channels.cache.get(config.discord.channels.officerChannel);
       case "Logger":
         return this.discord.client.channels.cache.get(config.discord.channels.loggingChannel);
+      case "Moderation":
+        return this.discord.client.channels.cache.get(config.discord.channels.moderationLogsChannel);
       default:
         return this.discord.client.channels.cache.get(config.discord.channels.debugChannel);
     }

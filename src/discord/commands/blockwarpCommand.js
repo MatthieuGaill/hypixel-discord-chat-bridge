@@ -1,9 +1,8 @@
-const sqlite3 = require('sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
-const { getUsername, resolveUsernameOrUUID } = require("../../contracts/API/mowojangAPI.js");
-const { isUuid } =  require("../../../API/utils/uuid.js");
+const { resolveUsernameOrUUID } = require("../../contracts/API/mowojangAPI.js");
+const { addblock, removeblock, getAllblocks } = require("../../contracts/blockwarp.js");
 
 
 
@@ -49,33 +48,25 @@ module.exports = {
     }
 
     try {
-      const db = new sqlite3.Database('blockwarplist.sqlite');
-      db.run('CREATE TABLE IF NOT EXISTS blockwarpdata (key TEXT PRIMARY KEY, username TEXT)');
   
       const [action, name] = [interaction.options.getString("action"), interaction.options.getString("name")];
-      let uuid = name;
-      let username = " ";
-      if (isUuid(name)){
-        username = await getUsername(uuid);
-      } else{
-        const dataUUID = await resolveUsernameOrUUID(name);
-        if (!dataUUID){
-            throw `This username doesn't exist`;
-        }
-        uuid = dataUUID['uuid'];
-        username = dataUUID['username'];
-      }
-      
-      
+
+
       if (action === "add"){
         if (name === null || !name){
           throw "You must specify an username or UUID with add";
         }
-        if (!username){
-          throw `This username/uuid doesn't exist`;
+
+        const dataUUID = await resolveUsernameOrUUID(name);
+        if (!dataUUID){
+          throw "Invalid Username or UUID";
         }
+     
+        const uuid = dataUUID['uuid'];
+        const username = dataUUID['username'];
+  
         
-        db.run('INSERT OR REPLACE INTO blockwarpdata (key, username) VALUES (?, ?)', uuid, username);
+        await addblock(uuid, username)
         const embed = new EmbedBuilder()
         .setColor(2067276)
         .setAuthor({ name: `Username Added`})
@@ -88,10 +79,15 @@ module.exports = {
         await interaction.followUp({embeds: [embed],});
         
       } else if (action === "remove"){
-        if (username === null){
-          throw "You must specify an username or UUID with remove";
+        const dataUUID = await resolveUsernameOrUUID(name);
+        if (!dataUUID){
+          throw "Invalid Username or UUID";
         }
-        db.run('DELETE FROM blockwarpdata WHERE key = ?', uuid);
+     
+        const uuid = dataUUID['uuid'];
+        const username = dataUUID['username'];
+        await removeblock(uuid);
+      
         const embed = new EmbedBuilder()
         .setColor(15105570)
         .setAuthor({ name: "User Removed" })
@@ -104,7 +100,15 @@ module.exports = {
   
         
       } else if (action === "list"){
-        const embed = await getList(db);
+        const verticalList = await getList();
+        const embed = new EmbedBuilder()
+        .setColor(16777215)
+        .setAuthor({ name: "Black List (warpouts)" })
+        .setDescription(verticalList)
+        .setFooter({
+          text: ' ',
+          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+      });
       
         await interaction.followUp( {embeds: [embed]});
       } else {
@@ -120,31 +124,19 @@ module.exports = {
 };
 
   
-async function getList(db){
+async function getList(){
   const dataDictionary = {};
-  return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM blockwarpdata', [], (err, rows) => {
-      if (err) {
-        //console.error(err);
-        reject(err);
-      }
-      rows.forEach((row) => { dataDictionary[row.key] = row.username;});
-      let verticalList = Object.entries(dataDictionary)
-       .map(([key, username]) => `**${username}**   (${key})`)
-       .join('\n'); 
-      if (!verticalList){
-        verticalList = "nobody on the warpout blacklist yet!";
-      }
-      const embed = new EmbedBuilder()
-        .setColor(16777215)
-        .setAuthor({ name: "Black List" })
-        .setDescription(verticalList)
-        .setFooter({
-          text: ' ',
-          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-      });
-      db.close();
-      resolve(embed)
-    });
-  });
+
+  const rows = getAllblocks();
+
+  rows.forEach((row) => { dataDictionary[row.key] = row.username;});
+  let verticalList = Object.entries(dataDictionary)
+    .map(([key, username]) => `**${username}**   (${key})`)
+    .join('\n'); 
+
+  if (!verticalList){
+    verticalList = "nobody on the warpout blacklist yet!";
+  }
+  return verticalList;
+
 }

@@ -1,8 +1,7 @@
-const sqlite3 = require('sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const { checkcode } = require("../../contracts/secretcodes.js");
 
 module.exports = {
   name: "code",
@@ -17,7 +16,7 @@ module.exports = {
   ],
 
   execute: async (interaction) => {
-    const user = interaction.member;
+    const user = interaction.user;
     if (
       config.discord.commands.checkPerms === true &&
       !(user.roles.cache.has(config.discord.commands.commandRole) || config.discord.commands.users.includes(user.id))
@@ -25,25 +24,18 @@ module.exports = {
       throw new HypixelDiscordChatBridgeError("You do not have permission to use this command.");
     }
     
-    const db = new sqlite3.Database('database.sqlite');
-    db.run('CREATE TABLE IF NOT EXISTS ticketdata (key TEXT PRIMARY KEY, value TEXT)');
 
-    const code_key = interaction.options.getString("code").toUpperCase().replace(/\s/g, '');;
+    const code_key = interaction.options.getString("code").toUpperCase().replace(/\s/g, '');
 
-    db.get('SELECT value FROM ticketdata WHERE key = ?', [code_key], (err, row) => {
-      if (err) {
-        console.error(err);
-        throw new HypixelDiscordChatBridgeError(err);
-        return;
-      }
+    try {
       const embed = new EmbedBuilder();
-      console.log(row);
+      const row = await checkcode(code_key);
       
       if (row) {
         embed
-        .setColor(12745742)
+        .setColor("Gold")
         .setAuthor({ name: "Prize claimed!" })
-        .setDescription(`Congratulations <@${user.id}> you won a **${row.value}**`)
+        .setDescription(`Congratulations <@${user.id}> you win a **${row.value}**`)
         .setFooter({
           text: ' ',
           iconURL: "https://i.imgur.com/Fc2R9Z9.png",});
@@ -58,12 +50,18 @@ module.exports = {
           iconURL: "https://i.imgur.com/Fc2R9Z9.png",});
       }
 
-      
-      interaction.followUp({embeds: [embed],});
-    });
 
-    await delay(1200);
-    db.run('DELETE FROM ticketdata WHERE key = ?', [code_key]);
+      await interaction.followUp({embeds: [embed],});
+
+    } catch{
+      embed
+      .setColor("Red")
+      .setAuthor({ name: "Error" })
+      .setDescription(`contact an administrator`)
+      .setFooter({
+        text: ' ',
+        iconURL: "https://i.imgur.com/Fc2R9Z9.png",});
+    }
 
   }
 };

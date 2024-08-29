@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appeal Form</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <h1>Appeal Form</h1>
+    <form id="appealForm">
+        <!-- Case ID -->
+        <label for="caseId">Case ID:</label><br>
+        <input type="text" id="caseId" name="caseId" required><br><br>
+
+        <!-- Punishment Justification -->
+        <label for="justified">Do you think the punishment was justified?</label><br>
+        <select id="justified" name="justified" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select><br><br>
+
+        <!-- Explanation if "No" -->
+        <label for="explanation">If you have answered "No", please explain why:</label><br>
+        <textarea id="explanation" name="explanation" rows="4"></textarea><br><br>
+
+        <!-- Reason for Appeal -->
+        <label for="reason">Why do you think your appeal should be accepted?</label><br>
+        <textarea id="reason" name="reason" rows="4" required></textarea><br><br>
+
+        <!-- Additional Information -->
+        <label for="additional">Any other thing you want us to know:</label><br>
+        <textarea id="additional" name="additional" rows="4"></textarea><br><br>
+
+        <!-- Submit Button -->
+        <button type="submit">Submit</button>
+    </form>
+
+    <script src="form-handler.js"></script> <!-- Link to the JavaScript file -->
+</body>
+</html>

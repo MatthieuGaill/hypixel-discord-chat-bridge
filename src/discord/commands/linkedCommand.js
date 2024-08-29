@@ -2,7 +2,7 @@ const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js")
 const { getUUID, getUsername } = require("../../contracts/API/mowojangAPI.js");
 const { SuccessEmbed } = require("../../contracts/embedHandler.js");
 const { EmbedBuilder } = require("discord.js");
-const { readFileSync } = require("fs");
+const { selectlink_discord, selectlink_uuid } = require("../../contracts/verify.js");
 
 module.exports = {
   name: "linked",
@@ -26,17 +26,17 @@ module.exports = {
 
   execute: async (interaction) => {
     try {
-      const linkedData = readFileSync("data/linked.json");
-      if (linkedData === undefined) {
-        throw new HypixelDiscordChatBridgeError(
-          "The linked data file does not exist. Please contact an administrator.",
-        );
-      }
+      // const linkedData = readFileSync("data/linked.json");
+      // if (linkedData === undefined) {
+      //   throw new HypixelDiscordChatBridgeError(
+      //     "The linked data file does not exist. Please contact an administrator.",
+      //   );
+      // }
 
-      const linked = JSON.parse(linkedData);
-      if (linked === undefined) {
-        throw new HypixelDiscordChatBridgeError("The linked data file is malformed. Please contact an administrator.");
-      }
+      // const linked = JSON.parse(linkedData);
+      // if (linked === undefined) {
+      //   throw new HypixelDiscordChatBridgeError("The linked data file is malformed. Please contact an administrator.");
+      // }
 
       const user = interaction.options.getUser("user");
       const name = interaction.options.getString("name");
@@ -45,7 +45,8 @@ module.exports = {
       }
 
       if (user && !name) {
-        const uuid = linked[user.id];
+        //const uuid = linked[user.id];
+        const uuid = await selectlink_discord(user.id);
         if (uuid === undefined) {
           throw new HypixelDiscordChatBridgeError("This user is not linked.");
         }
@@ -62,7 +63,8 @@ module.exports = {
           throw new HypixelDiscordChatBridgeError("This user does not exist.");
         }
 
-        const discordID = Object.keys(linked).find((key) => linked[key] === uuid);
+        //const discordID = Object.keys(linked).find((key) => linked[key] === uuid);
+        const discordID = await selectlink_uuid(uuid);
         if (discordID === undefined) {
           throw new HypixelDiscordChatBridgeError("This user is not linked.");
         }

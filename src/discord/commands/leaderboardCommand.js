@@ -1,8 +1,7 @@
-const sqlite3 = require('sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
-
+const { getList } = require("../../contracts/reputation.js");
 
 module.exports = {
   name: "leaderboard",
@@ -19,40 +18,12 @@ module.exports = {
     } 
 
     try{
-        const db = new sqlite3.Database('replist.sqlite');
-        const embed = await getList(db);
-        await interaction.followUp({embeds: [embed]});
-        
-    } catch(e){
-      const embed = new EmbedBuilder()
-      .setColor("Red")
-      .setAuthor({ name: "Error" })
-      .setDescription(e)
-      .setFooter({
-        text: 'Reputation tool',
-        iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-      });
-      interaction.followUp({embeds: [embed], ephemeral: true});
-    }
-    
+        const dataDictionary = await getList(interaction.guild);
 
-  },
-
-};
-
-  
-async function getList(db){
-    return new Promise((resolve, reject) => {
-      db.all('SELECT * FROM repdata', [], (err, rows) => {
-        if (err) {
-          reject(err);
-        }
-        const dataList = rows.map(row => [row.key, row.reputation]);
-        dataList.sort((a, b) => b[1] - a[1]);
-
-        let verticalList = dataList
-         .map(item => `**<@${item[0]}>** :  ${item[1]}`)
-         .join('\n'); 
+        let verticalList = Object.entries(dataDictionary)
+        .sort(([, a], [, b]) => b - a)
+        .map(item => `${item[0]} :  ${item[1]}`)
+        .join('\n');
 
         if (!verticalList){
           verticalList = "No reputation for anybody yet!";
@@ -65,8 +36,19 @@ async function getList(db){
             text: 'Reputation tool',
             iconURL: "https://i.imgur.com/Fc2R9Z9.png",
         });
-        db.close();
-        resolve(embed)
+        await interaction.followUp({embeds: [embed]});
+        
+    } catch(e){
+      console.error(e);
+      const embed = new EmbedBuilder()
+      .setColor("Red")
+      .setAuthor({ name: "Error" })
+      .setDescription(e)
+      .setFooter({
+        text: 'Reputation tool',
+        iconURL: "https://i.imgur.com/Fc2R9Z9.png",
       });
-    });
-  }
+      interaction.followUp({embeds: [embed], ephemeral: true});
+    }
+  },
+};

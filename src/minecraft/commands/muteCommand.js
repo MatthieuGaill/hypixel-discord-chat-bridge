@@ -3,6 +3,7 @@ const minecraftCommand = require("../../contracts/minecraftCommand.js");
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const { getUUID } = require("../../contracts/API/mowojangAPI.js");
 const config = require("../../../config.json");
+const { selectlink_uuid } = require("../../contracts/verify.js");
 
 
 class MuteCommand extends minecraftCommand {
@@ -45,9 +46,13 @@ class MuteCommand extends minecraftCommand {
       }
       const muted_username = arg[0];
       const time = arg[1];
-      let reason = "";
+      let reason = "From mc";
       if (arg[2]){
         reason = arg[2];
+      }
+      const row = await selectlink_uuid(uuid);
+      if (!row){
+        throw "You need to be linked to perform this command!";
       }
   
       const muteListener = async (message) => {
@@ -62,8 +67,15 @@ class MuteCommand extends minecraftCommand {
            }
       };
       bot.on("message", muteListener);
-      this.send(`/g mute ${muted_username} ${time}`);
-      await delay(4000);
+      await this.minecraft.bridgeMute({
+        reason: reason,
+        username: muted_username,
+        duration: time,
+        modName: username,
+        modId: row
+      });
+      //this.send(`/g mute ${muted_username} ${time}`);
+      await delay(5000);
       if (isRemove === false){
         bot.removeListener("message", muteListener);    
       }

@@ -1,4 +1,4 @@
-const { Client, Collection, AttachmentBuilder, GatewayIntentBits } = require("discord.js");
+const { Client, Collection, AttachmentBuilder, GatewayIntentBits, ModalSubmitInteraction } = require("discord.js");
 const CommunicationBridge = require("../contracts/CommunicationBridge.js");
 const { replaceVariables } = require("../contracts/helperFunctions.js");
 const messageToImage = require("../contracts/messageToImage.js");
@@ -9,6 +9,7 @@ const config = require("../../config.json");
 const Logger = require(".././Logger.js");
 const path = require("node:path");
 const fs = require("fs");
+const { duration } = require("moment");
 
 class DiscordManager extends CommunicationBridge {
   constructor(app) {
@@ -206,6 +207,54 @@ class DiscordManager extends CommunicationBridge {
         },
       ],
     });
+  }
+
+  async onBroadcastJoinedEmbed({ message, title, thumbnail, footer, color, channel }) {
+    Logger.broadcastMessage(message, "Event");
+
+    channel = await this.stateHandler.getChannel(channel);
+    channel.send({
+      embeds: [
+        {
+          color: color,
+          author: {
+            name: title,
+          },
+          thumbnail: {
+            url: thumbnail,
+          },
+          description: message,
+          footer: {
+            text: footer,
+          },
+        },
+      ],
+    });
+  }
+
+  async onBridgeMute({reason, username, duration, modName, modId}){
+    const command = await this.client.commands.get("mute");
+    //const modUser = await this.client.users.fetch(modId).catch(e => null);
+    const interaction = {
+      options: {
+        getString: (name) => {
+            if (name === "reason") return reason;
+            if (name === "mc_name") return username;
+            if (name === "duration") return duration;
+            return undefined;
+        },
+        getMember: (name) => {
+            return undefined;
+        }
+      },
+      guild: guild,
+      user: {
+        id: modId,
+        tag: modName
+      },
+      fromMc: true,
+    }
+    await command.execute(interaction);
   }
 
   async onPlayerToggle({ fullMessage, username, message, color, channel }) {

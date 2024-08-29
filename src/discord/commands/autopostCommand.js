@@ -96,7 +96,7 @@ module.exports = {
     }
 
     try {
-      const db = new Database('autopost.sqlite');
+      const db = new Database('data/autopost.sqlite');
       db.exec(`CREATE TABLE IF NOT EXISTS autopostdata (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         announcement TEXT,

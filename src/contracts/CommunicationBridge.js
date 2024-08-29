@@ -27,8 +27,16 @@ class CommunicationBridge {
     return this.bridge.onBroadcastHeadedEmbed(event);
   }
 
-  BroadcastDonationRequest(event) {
+  broadcastJoinedEmbed(event) {
+    return this.bridge.onBroadcastJoinedEmbed(event);
+  }
+
+  broadcastDonationRequest(event) {
     return this.bridge.onBroadcastDonationRequest(event);
+  }
+
+  bridgeMute(event){
+    return this.bridge.onBridgeMute(event);
   }
 
   connect() {

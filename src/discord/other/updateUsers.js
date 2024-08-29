@@ -8,7 +8,7 @@ if (config.verification.autoUpdater) {
   Logger.discordMessage(`RoleSync ready, executing every ${config.verification.autoUpdaterInterval} hours.`);
   cron.schedule(`0 */${config.verification.autoUpdaterInterval} * * *`, async () => {
     Logger.discordMessage("Executing RoleSync...");
-    await updateRolesCommand.execute(null, true);
+    //await updateRolesCommand.execute(null, true);
     await updateafkCommand.execute(null);
     Logger.discordMessage("RoleSync successfully executed.");
   });

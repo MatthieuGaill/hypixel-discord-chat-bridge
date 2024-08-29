@@ -1,4 +1,3 @@
-const Database = require('better-sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { getList, checkdonator, format_amount } = require("../../contracts/donator.js");
 const { EmbedBuilder } = require("discord.js");
@@ -46,7 +45,7 @@ module.exports = {
       const action = interaction.options.getSubcommand();
       
       if (action === "rank"){
-        const dataDictionary = await getList(guild);
+        const dataDictionary = await getList();
         const emojis = [':first_place:', ':second_place:', ':third_place:'];
         const defaultEmoji = ':ballot_box_with_check:'
         let verticalList = Object.entries(dataDictionary)
@@ -64,11 +63,11 @@ module.exports = {
         verticalList = verticalList + "\n";
 
         const embed = new EmbedBuilder()
-            .setColor(16777215)
+            .setColor("Gold")
             .setAuthor({ name: "Leaderboard of Donations (Millions)" })
             .setDescription(verticalList)
             .setFooter({
-            text: 'Donation Tool',
+            text: 'Golden Legion - Donations',
             iconURL: "https://i.imgur.com/Fc2R9Z9.png",
         });
         await interaction.followUp( {embeds: [embed]});
@@ -96,11 +95,11 @@ module.exports = {
         }
 
         const embed = new EmbedBuilder()
-        .setColor(16777215)
+        .setColor("Gold")
         .setTitle(title)
         .setDescription(desc)
         .setFooter({
-          text: 'Donation Tool',
+          text: 'Golden Legion - Donations',
           iconURL: "https://i.imgur.com/Fc2R9Z9.png",
         });
         

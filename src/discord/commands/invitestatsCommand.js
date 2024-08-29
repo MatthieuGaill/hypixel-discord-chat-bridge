@@ -1,4 +1,3 @@
-const Database = require('better-sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { addInvite, getList, removeInvite, checkdetails } = require("../../contracts/guildInvite.js");
 const { EmbedBuilder } = require("discord.js");

@@ -12,6 +12,7 @@ const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const Logger = require("../../Logger.js");
 const { readFileSync } = require("fs");
+const Database = require('better-sqlite3');
 
 
 class StateHandler extends eventHandler {
@@ -275,18 +276,65 @@ class StateHandler extends eventHandler {
         .trim()
         .split(/ +/g)[0];
       await delay(1000);
+      let  uuid = await getUUID(username).catch((error) => {
+        bot.chat(`/oc [ERROR] ${error}`);
+        uuid = '0';
+      });
+      await delay(1000);
+      
+      const db_ban = new Database('banlist.sqlite');
+      let uuidList = [];
+      try {
+        const rows = db_ban.prepare('SELECT key FROM bandata').all();
+        uuidList = rows.map(row => row.key);
+      } catch (error) {
+        bot.chat(`/oc [ERROR] ${error}`);
+      } finally {
+        db_ban.close();
+      }
+      
+
+      if (uuidList.includes(uuid)) {
+        bot.chat(`/gc ${username} is permanently banned from the guild!`);
+        
+        setTimeout(function() {
+          bot.chat(`/g kick ${username} banned`);
+        }, 700);
+        return [        
+          this.minecraft.broadcastHeadedEmbed({
+            message: replaceVariables(messages.joinMessage, { username }),
+            title: `Member Joined but is banned`,
+            icon: `https://mc-heads.net/avatar/${username}`,
+            color: 15105570,
+            channel: "Logger",
+          }),
+          this.minecraft.broadcastHeadedEmbed({
+            message: replaceVariables(messages.joinMessage, { username }),
+            title: `Member Joined but is banned`,
+            icon: `https://mc-heads.net/avatar/${username}`,
+            color: 15105570,
+            channel: "Guild",
+          }),
+        ];
+      }
+      db_ban.close();
+  
       bot.chat(
         `/gc ${replaceVariables(messages.guildJoinMessage, {
           username: username,
         })} `,
-      );
+      ); 
       await this.updateUser(username);
+      const m_rank = message.match(/\[(.*?)\]/)[0].trim();
+      const hypixelGuild = await hypixel.getGuild("name", "Golden Legion");
+
       return [
-        this.minecraft.broadcastHeadedEmbed({
-          message: replaceVariables(messages.joinMessage, { username }),
-          title: `Member Joined`,
-          icon: `https://mc-heads.net/avatar/${username}`,
-          color: 2067276,
+        this.minecraft.broadcastJoinedEmbed({
+          message:  `${m_rank} **${username}** joined the guild` ,
+          title: `${hypixelGuild.name} → New Member!`,
+          thumbnail: `https://mc-heads.net/avatar/${username}`,
+          footer: `New Member Count - ${hypixelGuild.members.length}`,
+          color: 5763719,
           channel: "Logger",
         }),
         this.minecraft.broadcastHeadedEmbed({
@@ -305,11 +353,15 @@ class StateHandler extends eventHandler {
         .trim()
         .split(/ +/g)[0];
       await this.updateUser(username);
+      const m_rank = message.match(/\[(.*?)\]/)[0].trim();
+      const hypixelGuild = await hypixel.getGuild("name", "Golden Legion");
+
       return [
-        this.minecraft.broadcastHeadedEmbed({
-          message: replaceVariables(messages.leaveMessage, { username }),
-          title: `Member Left`,
-          icon: `https://mc-heads.net/avatar/${username}`,
+        this.minecraft.broadcastJoinedEmbed({
+          message:  `${m_rank} **${username}** left the guild` ,
+          title: `${hypixelGuild.name} → Member Left!`,
+          thumbnail: `https://mc-heads.net/avatar/${username}`,
+          footer: `New Member Count - ${hypixelGuild.members.length}`,
           color: 15548997,
           channel: "Logger",
         }),
@@ -329,11 +381,15 @@ class StateHandler extends eventHandler {
         .trim()
         .split(/ +/g)[0];
       await this.updateUser(username);
+      const m_rank = message.match(/\[(.*?)\]/)[0].trim();
+      const hypixelGuild = await hypixel.getGuild("name", "Golden Legion");
+
       return [
-        this.minecraft.broadcastHeadedEmbed({
-          message: replaceVariables(messages.kickMessage, { username }),
-          title: `Member Kicked`,
-          icon: `https://mc-heads.net/avatar/${username}`,
+        this.minecraft.broadcastJoinedEmbed({
+          message:  `${m_rank} **${username}** was kicked from the guild` ,
+          title: `${hypixelGuild.name} → Member Kicked!`,
+          thumbnail: `https://mc-heads.net/avatar/${username}`,
+          footer: `New Member Count - ${hypixelGuild.members.length}`,
           color: 15548997,
           channel: "Logger",
         }),
@@ -374,7 +430,7 @@ class StateHandler extends eventHandler {
             rank,
           }),
           color: 2067276,
-          channel: "Logger",
+          channel: "Moderation",
         }),
       ];
     }
@@ -406,7 +462,7 @@ class StateHandler extends eventHandler {
             rank,
           }),
           color: 15548997,
-          channel: "Logger",
+          channel: "Moderation",
         }),
       ];
     }
@@ -495,7 +551,7 @@ class StateHandler extends eventHandler {
           }),
           title: `Blacklist`,
           color: 2067276,
-          channel: "Logger",
+          channel: "Moderation",
         }),
       ];
     }
@@ -517,7 +573,7 @@ class StateHandler extends eventHandler {
           }),
           title: `Blacklist`,
           color: 2067276,
-          channel: "Logger",
+          channel: "Moderation",
         }),
       ];
     }
@@ -590,7 +646,7 @@ class StateHandler extends eventHandler {
         this.minecraft.broadcastCleanEmbed({
           message: replaceVariables(messages.guildMuteMessage, { time }),
           color: 15548997,
-          channel: "Logger",
+          channel: "Moderation",
         }),
       ];
     }
@@ -605,7 +661,7 @@ class StateHandler extends eventHandler {
         this.minecraft.broadcastCleanEmbed({
           message: messages.guildUnmuteMessage,
           color: 2067276,
-          channel: "Logger",
+          channel: "Moderation",
         }),
       ];
     }
@@ -635,7 +691,7 @@ class StateHandler extends eventHandler {
             time,
           }),
           color: 15548997,
-          channel: "Logger",
+          channel: "Moderation",
         }),
       ];
     }
@@ -658,7 +714,7 @@ class StateHandler extends eventHandler {
             username,
           }),
           color: 2067276,
-          channel: "Logger",
+          channel: "Moderation",
         }),
       ];
     }
@@ -1085,16 +1141,7 @@ class StateHandler extends eventHandler {
         return;
       }
 
-      const linkedData = readFileSync("data/linked.json");
-      if (linkedData === undefined) {
-        return;
-      }
-      const linked = JSON.parse(linkedData);
-      if (linked === undefined) {
-        return;
-      }
-
-      const linkedUser = Object.values(linked).find((u) => player)
+      const linkedUser = await selectlink_uuid(player);
       if (linkedUser === undefined) {
         return;
       }

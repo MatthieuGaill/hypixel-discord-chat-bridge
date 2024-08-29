@@ -1,11 +1,9 @@
-const sqlite3 = require('sqlite3');
+const Database = require('better-sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const { getUsername, resolveUsernameOrUUID } = require("../../contracts/API/mowojangAPI.js");
 const { isUuid } =  require("../../../API/utils/uuid.js");
-
-
 
 module.exports = {
   name: "banlist",
@@ -49,102 +47,118 @@ module.exports = {
     }
 
     try {
-      const db = new sqlite3.Database('banlist.sqlite');
-      db.run('CREATE TABLE IF NOT EXISTS bandata (key TEXT PRIMARY KEY, username TEXT)');
+      const db = new Database('data/banlist.sqlite');
+      db.prepare('CREATE TABLE IF NOT EXISTS bandata (key TEXT PRIMARY KEY, username TEXT)').run();
   
       const [action, name] = [interaction.options.getString("action"), interaction.options.getString("name")];
       let uuid = name;
-      let username = " ";
-      if (isUuid(name)){
-        username = await getUsername(uuid);
-      } else{
-        const dataUUID = await resolveUsernameOrUUID(name);
-        if (!dataUUID){
+      let username = "";
+      
+      if (action === "add") {
+        if (name === null || !name) {
+          throw "You must specify a username or UUID with add";
+        }
+
+        if (isUuid(name)) {
+          username = await getUsername(uuid);
+        } else {
+          const dataUUID = await resolveUsernameOrUUID(name);
+          if (!dataUUID) {
             throw `This username doesn't exist`;
+          }
+          uuid = dataUUID['uuid'];
+          username = dataUUID['username'];
         }
-        uuid = dataUUID['uuid'];
-        username = dataUUID['username'];
-      }
-      
-      
-      if (action === "add"){
-        if (name === null || !name){
-          throw "You must specify an username or UUID with add";
-        }
-        if (!username){
+
+        if (!username) {
           throw `This username/uuid doesn't exist`;
         }
-        
-        db.run('INSERT OR REPLACE INTO bandata (key, username) VALUES (?, ?)', uuid, username);
+
+        db.prepare('INSERT OR REPLACE INTO bandata (key, username) VALUES (?, ?)').run(uuid, username);
+
         const embed = new EmbedBuilder()
-        .setColor(2067276)
-        .setAuthor({ name: `Username Added`})
-        .setDescription(`Successfully added **${username}** with the uuid **${uuid}**`)
-        .setFooter({
-          text: ' ',
-          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-        });
-  
-        await interaction.followUp({embeds: [embed],});
-        
-      } else if (action === "remove"){
-        if (username === null){
-          throw "You must specify an username or UUID with remove";
+          .setColor(2067276)
+          .setAuthor({ name: `Username Added` })
+          .setDescription(`Successfully added **${username}** with the uuid **${uuid}**`)
+          .setFooter({
+            text: ' ',
+            iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+          });
+
+        await interaction.followUp({ embeds: [embed] });
+
+      } else if (action === "remove") {
+        if (name === null || !name) {
+          throw "You must specify a username or UUID with remove";
         }
-        db.run('DELETE FROM bandata WHERE key = ?', uuid);
+
+        if (isUuid(name)) {
+          username = await getUsername(uuid);
+        } else {
+          const dataUUID = await resolveUsernameOrUUID(name);
+          if (!dataUUID) {
+            throw `This username doesn't exist`;
+          }
+          uuid = dataUUID['uuid'];
+          username = dataUUID['username'];
+        }
+
+        db.prepare('DELETE FROM bandata WHERE key = ?').run(uuid);
+
         const embed = new EmbedBuilder()
-        .setColor(15105570)
-        .setAuthor({ name: "User Removed" })
-        .setDescription(`Successfully removed **${username}** from the banlist`)
-        .setFooter({
-          text: ' ',
-          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-        });
-        await interaction.followUp({embeds: [embed],});
-  
-        
-      } else if (action === "list"){
-        const embed = await getList(db);
-      
-        await interaction.followUp( {embeds: [embed]});
-      } else {
-        throw "Wrong usage: /banlist (add/remove/list) [username]";
-      }
-      
-    } catch(e){
-        throw new HypixelDiscordChatBridgeError(`${e}`);
-    }
+          .setColor(15105570)
+          .setAuthor({ name: "User Removed" })
+          .setDescription(`Successfully removed **${username}** from the banlist`)
+          .setFooter({
+            text: ' ',
+            iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+          });
 
-  },
+        await interaction.followUp({ embeds: [embed] });
 
-};
-
-  
-async function getList(db){
-  const dataDictionary = {};
-  return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM bandata', [], (err, rows) => {
-      if (err) {
-        //console.error(err);
-        reject(err);
-      }
-      rows.forEach((row) => { dataDictionary[row.key] = row.username;});
-      let verticalList = Object.entries(dataDictionary)
-       .map(([key, username]) => `**${username}**   (${key})`)
-       .join('\n'); 
-      if (!verticalList){
-        verticalList = "nobody on the banlist yet!";
-      }
-      const embed = new EmbedBuilder()
+      } else if (action === "list") {
+        const verticalList = await getList(db);
+        if (!verticalList) {
+          verticalList = "nobody on the banlist yet!";
+        }
+        const embed = new EmbedBuilder()
         .setColor(16777215)
         .setAuthor({ name: "Ban List" })
         .setDescription(verticalList)
         .setFooter({
           text: ' ',
           iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-      });
-      db.close();
-      resolve(embed)
+        });
+  
+        await interaction.followUp({ embeds: [embed] });
+
+      } else {
+        throw "Wrong usage: /banlist (add/remove/list) [username]";
+      }
+
+    } catch (e) {
+      throw new HypixelDiscordChatBridgeError(`${e}`);
+    }
+  },
+};
+
+async function getList(db) {
+  try {
+    const dataDictionary = {};
+    const rows = db.prepare('SELECT * FROM bandata').all();
+    
+    rows.forEach((row) => {
+      dataDictionary[row.key] = row.username;
     });
-  });
+
+    let verticalList = Object.entries(dataDictionary)
+      .map(([key, username]) => `**${username}**   (${key})`)
+      .join('\n');
+
+
+    return verticalList;
+
+  } catch (error) {
+    throw new HypixelDiscordChatBridgeError(error.message);
+  }
 }

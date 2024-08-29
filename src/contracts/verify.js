@@ -1,53 +1,42 @@
 const Database = require('better-sqlite3');
-const hypixel = require("./API/HypixelRebornAPI.js");
-const { getHypixelPlayer } = require("../../API/functions/getHypixelPlayer.js");
-const { getUsername } = require("./API/mowojangAPI.js");
 
-
-const db = new Database('verify.sqlite');
-db.exec(`CREATE TABLE IF NOT EXISTS verifydata (
+const db = new Database('data/linked.db');
+db.exec(`CREATE TABLE IF NOT EXISTS linked (
   uuid TEXT PRIMARY KEY,
-  discordid TEXT
+  discordId TEXT
 )`);
 
 
-
-async function addentry(uuid, discord_id) {
-    db.prepare('INSERT INTO verifydata (uuid, discordid) VALUES (?, ?)').run(uuid, discord_id);
+async function addlink(uuid, discordId) {
+    db.prepare('INSERT INTO linked (uuid, discordId) VALUES (?, ?)').run(uuid, discordId);
 }
 
-async function removeentry(uuid) {
-    db.prepare('DELETE FROM verifydata WHERE uuid = ?').run(uuid);
+async function removelink_uuid(uuid) {
+    db.prepare('DELETE FROM linked WHERE uuid = ?').run(uuid);
 }
 
-async function selectentry(uuid) {
-    const user = db.prepare('SELECT discordid FROM verifydata WHERE uuid = ?').get(uuid);
+async function removelink_discord(discordId) {
+    db.prepare('DELETE FROM linked WHERE discordId = ?').run(discordId);
+}
+
+async function selectlink_uuid(uuid) {
+    const user = db.prepare('SELECT discordid FROM linked WHERE uuid = ?').get(uuid);
     if (user){
-        return user.discordid;
+        return user.discordId;
     }
     return undefined;
 }
 
-async function selectentry_discord(discord_id) {
-    const user = db.prepare('SELECT uuid FROM verifydata WHERE discord_id = ?').get(discord_id);
+async function selectlink_discord(discordId) {
+    const user = db.prepare('SELECT uuid FROM linked WHERE discordId = ?').get(discordId);
     if (user){
         return user.uuid;
     }
     return undefined;
 }
 
-async function getList(){
-    const rows = db.prepare('SELECT * FROM verifydata').all();
-    const dataDictionary = {};
-
-    for (const row of rows) {
-      uuid = row.uuid;
-      user = await getUsername(uuid);
-      dataDictionary[`\`${user}\``] = row.discordid;
-    }
-
-    return dataDictionary;
+async function getAllLinks() {
+    return db.prepare('SELECT * FROM linked').all();
 }
 
-
-module.exports = { addentry, removeentry, selectentry, selectentry_discord, getList };
+module.exports = { addlink, removelink_uuid, removelink_discord, selectlink_uuid, selectlink_discord, getAllLinks };

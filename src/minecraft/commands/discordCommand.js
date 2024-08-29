@@ -5,7 +5,7 @@ class DiscordCommand extends minecraftCommand {
     super(minecraft);
 
     this.name = "discord";
-    this.aliases = ["ds"];
+    this.aliases = ["ds", "dc"];
     this.description = "Shows the discord of the guild";
     this.options = [];
   }

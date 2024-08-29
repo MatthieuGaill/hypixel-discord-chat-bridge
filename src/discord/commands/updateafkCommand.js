@@ -1,14 +1,6 @@
-const {
-  Client,
-  ApplicationCommandOptionType,
-  ChatInputCommandInteraction,
-  EmbedBuilder,
-  APIEmbedField,
-  ButtonBuilder,
-  ButtonStyle,
-} = require("discord.js");
-const Database = require('better-sqlite3');
-const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
+const {EmbedBuilder} = require("discord.js");
+const { getExpiredAfks, getAllAfks, getAndRemove } = require("../../contracts/afk.js");
+const config = require("../../../config.json");
 
 module.exports = {
   name: "updateafk",
@@ -23,26 +15,26 @@ module.exports = {
   ],
 
   execute: async (interaction) => {
-    const db = new Database('afkdatabase.sqlite');
-    db.prepare('CREATE TABLE IF NOT EXISTS afkdata (key TEXT PRIMARY KEY, user TEXT NOT NULL, date TEXT, reason TEXT)').run();
 
     //const guild = interaction.guild;
-    
     //const channel = interaction.client.channels.fetch("1100048976599863357");
-
     //const channel = interaction.channel1;
-    const channel = guild.channels.cache.get("1100048976599863357");
+
+    const channel = guild.channels.cache.get(config.discord.channels.afkChannel);
 
     try {
-      if (!interaction.options){
-        const delete_id = interaction.options.getString("delete_id");
-        if (delete_id) {
-          const row = db.prepare('SELECT key FROM afkdata WHERE key = ?').get(delete_id);
-          if (row) {
-            const delete_Message = await channel.messages.fetch(row.key);
-            delete_Message.delete();
+      if (interaction !== null){
+        if (interaction.options){
+          const delete_id = interaction.options.getString("delete_id");
+          if (delete_id) {
+            const test_row = await getAndRemove(delete_id);
+            if (test_row) {
+              const delete_Message = await channel.messages.fetch(delete_id).catch(e => null);
+              if (delete_Message){
+                await delete_Message.delete();
+              }
+            }
           }
-          db.prepare('DELETE FROM afkdata WHERE key = ?').run(delete_id);
         }
       }
 
@@ -50,39 +42,36 @@ module.exports = {
         .setColor("Grey")
         .setTitle("**Expired :warning:**");
 
-      const date_now = Date.now();
 
-      const rows = db.prepare('SELECT * FROM afkdata WHERE date < ?').all(date_now);
-      for (const row of rows) {
-        const fetchedMessage = await channel.messages.fetch(row.key);
-        const oldEmbed = fetchedMessage.embeds[0];
-        oldEmbed['data']['color'] = 9807270;
-        await fetchedMessage.edit({ embeds: [oldEmbed, newEmbed] });
-        fetchedMessage.reply(`**<@${row.user}> your afk request has expired or will expire soon ** :warning:`);
+      const rows = await getExpiredAfks();
+      if (rows){
+        for (const row of rows) {
+          const fetchedMessage = await channel.messages.fetch(row.key);
+          const oldEmbed = fetchedMessage.embeds[0];
+          oldEmbed['data']['color'] = 9807270;
+          await fetchedMessage.edit({ embeds: [oldEmbed, newEmbed] });
+          fetchedMessage.reply(`**<@${row.user}> your afk request has expired or will expire soon ** :warning:`);
+        }
       }
 
-      db.prepare('DELETE FROM afkdata WHERE date < ?').run(date_now);
-
-      const embed = await getList(db);
+      const embed = await getList();
       if (interaction === null){
-        const channel2 = guild.channels.cache.get("821482920509833246");
-        channel2.send({ embeds: [embed] });
+        //const channel2 = guild.channels.cache.get(config.discord.channels.afkChannel);
+        channel.send({ embeds: [embed] });
       } else{
         await interaction.followUp({ embeds: [embed] });
       }
       
 
     } catch (error) {
-      console.error('Error in processRows:', error);
-    } finally {
-      db.close();
+      console.error(error);
     }
   },
 };
 
-async function getList(db) {
+async function getList() {
   const dataDictionary = {};
-  const rows = db.prepare('SELECT * FROM afkdata').all();
+  const rows = await getAllAfks();
   rows.forEach((row) => {
     dataDictionary[row.key] = [row.user, row.date, row.reason];
   });

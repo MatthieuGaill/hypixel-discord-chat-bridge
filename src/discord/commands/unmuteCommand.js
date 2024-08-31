@@ -117,7 +117,7 @@ module.exports = {
           iconURL: discord_member.user.avatarURL(),
         })
         .addFields(modLogfields)
-        .setColor("Red")
+        .setColor("Green")
         .setTimestamp()
         .setFooter({
           text: `ID: ${discord_member.id}`,

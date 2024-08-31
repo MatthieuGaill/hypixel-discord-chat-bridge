@@ -56,8 +56,8 @@ module.exports = {
 
       const embed = await getList();
       if (interaction === null){
-        //const channel2 = guild.channels.cache.get(config.discord.channels.afkChannel);
-        channel.send({ embeds: [embed] });
+        const channel2 = guild.channels.cache.get("821482920509833246");
+        channel2.send({ embeds: [embed] });
       } else{
         await interaction.followUp({ embeds: [embed] });
       }

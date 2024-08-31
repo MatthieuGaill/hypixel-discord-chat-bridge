@@ -35,8 +35,8 @@ class CommunicationBridge {
     return this.bridge.onBroadcastDonationRequest(event);
   }
 
-  bridgeMute(event){
-    return this.bridge.onBridgeMute(event);
+  bridgeSanctions(event){
+    return this.bridge.onBridgeSanctions(event);
   }
 
   connect() {

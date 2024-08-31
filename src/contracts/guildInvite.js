@@ -2,7 +2,7 @@ const Database = require('better-sqlite3');
 const hypixel = require("./API/HypixelRebornAPI.js");
 // const config = require("../../config.json");
 // const axios = require("axios");
-const { readFileSync } = require("fs");
+const { selectlink_uuid } = require('./verify.js');
 
 //const cache = new Map();
 const db = new Database('data/guildinvite.sqlite');
@@ -13,26 +13,6 @@ db.exec(`CREATE TABLE IF NOT EXISTS invitedata (
 )`);
 
 
-async function readLinked() {
-  const linkedData = readFileSync("data/linked.json");
-  if (!linkedData) {
-    return undefined;
-  }
-  const linked = JSON.parse(linkedData);
-  if (!linked) {
-    return undefined;
-  }
-  return linked;
-}
-
-async function checkdiscord(linked, uuid){
-  if (linked === undefined){
-    return undefined;
-  }
-  const discord_id = Object.keys(linked).find((key) => linked[key] === uuid);
-
-  return discord_id
-}
 
 async function addInvite(inviterUUID, invitedUUID) {
     const inviter = db.prepare('SELECT members FROM invitedata WHERE uuid = ?').get(inviterUUID);
@@ -49,7 +29,6 @@ async function addInvite(inviterUUID, invitedUUID) {
 }
 
 async function getInvites(inviterUUID, hypixelGuildMembers) {
-  const linked = readLinked();
   const user = db.prepare('SELECT members FROM invitedata WHERE uuid = ?').get(inviterUUID);
 
   if (!user) {
@@ -68,7 +47,7 @@ async function getInvites(inviterUUID, hypixelGuildMembers) {
         await removeInvite(inviterUUID, member);
       } else{
         totalInvited += 1;
-        const d_id = await checkdiscord(member);
+        const d_id = await selectlink_uuid(member);
         if (d_id) {
           discordmemberslist.push(member);
         }

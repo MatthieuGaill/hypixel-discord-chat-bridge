@@ -11,8 +11,7 @@ const messages = require("../../../messages.json");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const Logger = require("../../Logger.js");
-const { readFileSync } = require("fs");
-const Database = require('better-sqlite3');
+const { checkbandata } = require("../../contracts/banlist.js");
 
 
 class StateHandler extends eventHandler {
@@ -282,19 +281,14 @@ class StateHandler extends eventHandler {
       });
       await delay(1000);
       
-      const db_ban = new Database('banlist.sqlite');
-      let uuidList = [];
+      let row;
       try {
-        const rows = db_ban.prepare('SELECT key FROM bandata').all();
-        uuidList = rows.map(row => row.key);
+        row = await checkbandata(uuid);
       } catch (error) {
         bot.chat(`/oc [ERROR] ${error}`);
-      } finally {
-        db_ban.close();
-      }
+      } 
       
-
-      if (uuidList.includes(uuid)) {
+      if (row) {
         bot.chat(`/gc ${username} is permanently banned from the guild!`);
         
         setTimeout(function() {
@@ -317,7 +311,6 @@ class StateHandler extends eventHandler {
           }),
         ];
       }
-      db_ban.close();
   
       bot.chat(
         `/gc ${replaceVariables(messages.guildJoinMessage, {

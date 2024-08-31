@@ -40,6 +40,13 @@ module.exports = {
     const reason = interaction.options.getString("reason");
     const member = await interaction.options.getMember("member");
     try {
+
+      if (!interaction.user && interaction.fromMc){
+        interaction.user = {
+          tag: "Golden_Legion",
+          id: "1109873692344848555"
+        }
+      }
       let str = ""
 
       let uuid;
@@ -78,16 +85,18 @@ module.exports = {
 
       if (uuid){
         // Get hypixel guild member
-        const hypixelGuild = await hypixelRebornAPI.getGuild("name", "Golden Legion");
-        if (hypixelGuild === undefined) {
-            throw "Hypixel Guild not found.";
+        if (interaction.fromMc){
+          const hypixelGuild = await hypixelRebornAPI.getGuild("name", "Golden Legion");
+          if (hypixelGuild === undefined) {
+              throw "Hypixel Guild not found.";
+          }
+          const hypixelguildMember = hypixelGuild.members.find((m) => m.uuid === uuid);
+          if (!hypixelguildMember){
+              throw "Could not find minecraft player. Weird.";
+          }
         }
-        const hypixelguildMember = hypixelGuild.members.find((m) => m.uuid === uuid);
-        if (!hypixelguildMember){
-            throw "Could not find minecraft player. Weird.";
-        }
+       
         str += `<:yes:1067859611262128210> Warned on minecraft: ${mcname}\n`;
-        //bot.chat(`/gc ${mcname} has been warned for: ${reason}`);
       } else{
         uuid =0;
       }
@@ -168,32 +177,40 @@ module.exports = {
         
       }
       
-      const embed = new EmbedBuilder()
-      .setAuthor({
-        name: `Warned ${mcname}`, 
-      })
-      .setDescription(str)
-      .setColor(5763719)
-      .setTimestamp()
-      .setFooter({
-        text: `Case: ${caseId}`,
-        iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-      });  
-      await interaction.followUp({
-        embeds: [embed],
-      });
+      if (!interaction.fromMc){
+        const embed = new EmbedBuilder()
+        .setAuthor({
+          name: `Warned ${mcname}`, 
+        })
+        .setDescription(str)
+        .setColor(5763719)
+        .setTimestamp()
+        .setFooter({
+          text: `Case: ${caseId}`,
+          iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+        });  
+        await interaction.followUp({embeds: [embed],});
+      } else{
+        bot.chat(`/oc ${mcname} has been warned (${reason})`);
+      }
+
 
     } catch (e){        
         console.error(e);
-        const embed = new EmbedBuilder()
-        .setColor("Red")
-        .setAuthor({ name: "Error" })
-        .setDescription(e)
-        .setFooter({
-            text: 'Golden Legion Bot',
-            iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-        });
-        interaction.followUp({embeds: [embed], ephemeral: true});
+        if (interaction.fromMc){
+          bot.chat(`/oc [ERROR] ${e}`);
+        } else{
+          const embed = new EmbedBuilder()
+            .setColor("Red")
+            .setAuthor({ name: "Error" })
+            .setDescription(e)
+            .setFooter({
+              text: 'Golden Legion Bot',
+              iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+            });
+          interaction.followUp({embeds: [embed], ephemeral: true});
+        }
+
         
     }
   },

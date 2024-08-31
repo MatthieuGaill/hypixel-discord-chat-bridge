@@ -32,19 +32,26 @@ module.exports = {
 
         await interaction.editReply({ embeds: [embed], ephemeral: true });
       }
-
       const description = [];
       for (let i = 0; i < allLinks.length; i++) {
         const { discordId } = allLinks[i];
-        const user = await interaction.guild.members.fetch(discordId).catch(() => {});
-
+        let user;
+        if (doNotRespond === true){
+          user = await guild.members.fetch(discordId).catch(() => {});
+          interaction = {
+            member: user,
+            user: user.user,
+            doNotRespond: true
+          }
+        } else{
+          user = await interaction.guild.members.fetch(discordId).catch(() => {});
+        }
         if (!user) {
           await removelink_discord(discordId);
           continue;
         }
 
-        interaction.member = undefined;
-        await updateRolesCommand.execute(interaction, user.user, true).catch(() => {
+        await updateRolesCommand.execute(interaction, user.user).catch(() => {
           description.push(`- <@${discordId}>`);
         });
 

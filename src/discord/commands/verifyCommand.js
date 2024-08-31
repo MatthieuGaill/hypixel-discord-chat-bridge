@@ -1,6 +1,5 @@
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const hypixelRebornAPI = require("../../contracts/API/HypixelRebornAPI.js");
-const { writeFileSync, readFileSync } = require("fs");
 const config = require("../../../config.json");
 const { EmbedBuilder } = require("discord.js");
 const { selectlink_discord, selectlink_uuid, removelink_discord, removelink_uuid, addlink } = require("../../contracts/verify.js");
@@ -48,7 +47,7 @@ module.exports = {
           );
         }
       }
-      if (bypassChecks = true){
+      if (bypassChecks === true){
         const check_member = await interaction.guild.members.fetch(interaction.user.id).catch(e => null);
         if (!check_member){
           throw "This person is not on the guild discord server!";
@@ -59,8 +58,10 @@ module.exports = {
       if (discordUsername === undefined && bypassChecks !== true) {
         throw new HypixelDiscordChatBridgeError("This player does not have a Discord linked.");
       }
-
-      if (discordUsername?.toLowerCase() != interaction.user.username && bypassChecks !== true) {
+      console.log(`discordUsername: ${discordUsername}`);
+      console.log(interaction.user.username);
+      console.log(bypassChecks);
+      if (discordUsername.toLowerCase() != interaction.user.username && bypassChecks !== true) {
         throw new HypixelDiscordChatBridgeError(
           `The player '${nickname}' has linked their Discord account to a different account ('${discordUsername}').`,
         );
@@ -77,9 +78,9 @@ module.exports = {
       await addlink(uuid, interaction.user.id);
 
       const embed = new EmbedBuilder()
-        .setColor("4BB543")
+        .setColor("Gold")
         .setAuthor({ name: "Successfully linked!" })
-        .setDescription(`${user ? `<@${user.id}>'s` : "Your"} account has been successfully linked to \`${nickname}\``)
+        .setDescription(`${user ? `<@${user.id}>'s` : "Your"} account has been successfully linked to \`${nickname}\` <:verified:859701120015138857> `)
         .setFooter({
           text: `/help [command] for more information`,
           iconURL: "https://i.imgur.com/Fc2R9Z9.png",
@@ -91,7 +92,6 @@ module.exports = {
       if (updateRolesCommand === undefined) {
         throw new HypixelDiscordChatBridgeError("The update command does not exist. Please contact an administrator.");
       }
-      console.log(interaction.user);
       await updateRolesCommand.execute(interaction, interaction.user);
     } catch (error) {
       console.log(error);

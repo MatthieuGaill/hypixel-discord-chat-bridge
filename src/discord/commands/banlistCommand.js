@@ -4,6 +4,7 @@ const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const { getUsername, resolveUsernameOrUUID } = require("../../contracts/API/mowojangAPI.js");
 const { isUuid } =  require("../../../API/utils/uuid.js");
+const { addbandata, removebandata, getAllbandata } = require('../../contracts/banlist.js');
 
 module.exports = {
   name: "banlist",
@@ -59,22 +60,19 @@ module.exports = {
           throw "You must specify a username or UUID with add";
         }
 
-        if (isUuid(name)) {
-          username = await getUsername(uuid);
-        } else {
-          const dataUUID = await resolveUsernameOrUUID(name);
-          if (!dataUUID) {
-            throw `This username doesn't exist`;
-          }
-          uuid = dataUUID['uuid'];
-          username = dataUUID['username'];
+        const dataUUID = await resolveUsernameOrUUID(name);
+        if (!dataUUID) {
+          throw `This username/UUID doesn't exist`;
         }
+        uuid = dataUUID['uuid'];
+        username = dataUUID['username'];
+      
 
         if (!username) {
           throw `This username/uuid doesn't exist`;
         }
 
-        db.prepare('INSERT OR REPLACE INTO bandata (key, username) VALUES (?, ?)').run(uuid, username);
+        await addbandata(uuid, username);
 
         const embed = new EmbedBuilder()
           .setColor(2067276)
@@ -91,19 +89,14 @@ module.exports = {
         if (name === null || !name) {
           throw "You must specify a username or UUID with remove";
         }
-
-        if (isUuid(name)) {
-          username = await getUsername(uuid);
-        } else {
-          const dataUUID = await resolveUsernameOrUUID(name);
-          if (!dataUUID) {
-            throw `This username doesn't exist`;
-          }
-          uuid = dataUUID['uuid'];
-          username = dataUUID['username'];
+        const dataUUID = await resolveUsernameOrUUID(name);
+        if (!dataUUID) {
+          throw `This username/UUID doesn't exist`;
         }
-
-        db.prepare('DELETE FROM bandata WHERE key = ?').run(uuid);
+        uuid = dataUUID['uuid'];
+        username = dataUUID['username'];
+        
+        await removebandata(uuid);
 
         const embed = new EmbedBuilder()
           .setColor(15105570)
@@ -117,7 +110,17 @@ module.exports = {
         await interaction.followUp({ embeds: [embed] });
 
       } else if (action === "list") {
-        const verticalList = await getList(db);
+        const dataDictionary = {};
+        const rows = await getAllbandata();
+        
+        rows.forEach((row) => {
+          dataDictionary[row.key] = row.username;
+        });
+    
+        let verticalList = Object.entries(dataDictionary)
+          .map(([key, username]) => `**${username}**   (${key})`)
+          .join('\n');
+    
         if (!verticalList) {
           verticalList = "nobody on the banlist yet!";
         }
@@ -141,24 +144,3 @@ module.exports = {
     }
   },
 };
-
-async function getList(db) {
-  try {
-    const dataDictionary = {};
-    const rows = db.prepare('SELECT * FROM bandata').all();
-    
-    rows.forEach((row) => {
-      dataDictionary[row.key] = row.username;
-    });
-
-    let verticalList = Object.entries(dataDictionary)
-      .map(([key, username]) => `**${username}**   (${key})`)
-      .join('\n');
-
-
-    return verticalList;
-
-  } catch (error) {
-    throw new HypixelDiscordChatBridgeError(error.message);
-  }
-}

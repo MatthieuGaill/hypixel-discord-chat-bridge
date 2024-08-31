@@ -1,34 +1,34 @@
+const { getAllautoposts, setCurrent, deleteautopost } = require("../../contracts/autopost.js");
 const minecraftCommand = require("../../contracts/minecraftCommand.js");
-const Database = require('better-sqlite3');
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 setInterval(async () => {
 try {
     const eventBOT = new minecraftCommand(bot);
 
-    const db = new Database('autopost.sqlite');
-    db.exec(`CREATE TABLE IF NOT EXISTS autopostdata (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      announcement TEXT,
-      interval INTEGER,
-      duration INTEGER,
-      current INTEGER
-    )`);
     const currentTime = Date.now(); //Math.floor(Date.now() / 1000);
-    const rows = db.prepare("SELECT * FROM autopostdata").all();
+    const rows = await getAllautoposts();
+    console.log("AUTOPOST");
+    console.log(rows);
 
 
     for (const row of rows) {
         const { id, announcement, interval, duration, current } = row;
+        console.log(`id: ${id}`);
+        console.log(`announcement: ${announcement}`);
+        console.log(`interval: ${interval}`);
+        console.log(`duration: ${duration}`);
+        console.log(`current: ${current}`);
         const difftime = currentTime - current;
+        console.log(`difftime: ${difftime}`);
 
         if (duration > currentTime) {
             if (difftime + 4 * 60 * 1000 > interval) {
-                db.prepare("UPDATE autopostdata SET current = ? WHERE id = ?").run(currentTime, id);
+                await setCurrent(currentTime, id);
                 eventBOT.send(`/gc ${announcement}`);
             }
         } else {
-            db.prepare("DELETE FROM autopostdata WHERE id = ?").run(id);
+            await deleteautopost(id);
         }
         await delay(2000);
     }
@@ -36,6 +36,7 @@ try {
 } catch (e) {
     console.log(e);
 }
+//}, 60000);
 }, 300000);
 
 

@@ -96,7 +96,19 @@ async function UpdateRolesDonation(memberRoles, uuid, guild_bool){
   }
 }
 
-async function addDonation(guild, donatorUUID, amount) {
+async function removeRolesDonation(memberRoles){
+  role_1000 = "1270485871589851136";
+  role_500 = "1270485618387980479";
+  role_100 = "1270485437714006138";
+  role_10 = "1270485283678191616";
+  
+  memberRoles.removeRole(role_1000, `Unverified`);
+  memberRoles.removeRole(role_500, `Unverified`);
+  memberRoles.removeRole(role_100, `Unverified`);
+  memberRoles.removeRole(role_100, `Unverified`);
+}
+
+async function addDonation(donatorUUID, amount) {
 
     let donator = db.prepare('SELECT amount FROM donatedata WHERE uuid = ?').get(donatorUUID);
     let new_amount = amount;
@@ -109,10 +121,10 @@ async function addDonation(guild, donatorUUID, amount) {
       db.prepare('INSERT INTO donatedata (uuid, amount) VALUES (?, ?)').run(donatorUUID, new_amount);
     }
 
-    await updateUser(guild, donatorUUID);
+    //await updateUser(guild, donatorUUID);
 }
 
-async function removeDonation(guild, donatorUUID, amount) {
+async function removeDonation(donatorUUID, amount) {
     let donator = db.prepare('SELECT amount FROM donatedata WHERE uuid = ?').get(donatorUUID);
 
     if (donator) {
@@ -125,7 +137,6 @@ async function removeDonation(guild, donatorUUID, amount) {
             db.prepare('UPDATE donatedata SET amount = ? WHERE uuid = ?').run(new_amount, donatorUUID);
         }
         
-        await updateUser(guild, donatorUUID);
         return true;
     }
     return false;
@@ -198,4 +209,4 @@ async function updateUser(guild, uuid) {
 
 
 
-module.exports = { addDonation, removeDonation, getList, checkdonator, format_amount, UpdateRolesDonation };
+module.exports = { addDonation, removeDonation, getList, checkdonator, format_amount, UpdateRolesDonation, removeRolesDonation };

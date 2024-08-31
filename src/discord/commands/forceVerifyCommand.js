@@ -27,6 +27,7 @@ module.exports = {
       throw new HypixelDiscordChatBridgeError("The verify command does not exist. Please contact an administrator.");
     }
     interaction.user = undefined;
+    interaction.bypass = true;
     await verifyCommand.execute(interaction, user, true);
   },
 };

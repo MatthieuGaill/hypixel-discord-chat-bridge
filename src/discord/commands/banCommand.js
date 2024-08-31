@@ -6,6 +6,7 @@ const { addentry, updateMessageId } = require("../../contracts/moderation.js");
 const config = require("../../../config.json");
 const { selectlink_uuid, selectlink_discord } = require("../../contracts/verify.js");
 const { randomBytes } = require("node:crypto");
+const { addbandata } = require("../../contracts/banlist.js");
 
 module.exports = {
   name: "ban",
@@ -84,8 +85,9 @@ module.exports = {
         if (!hypixelguildMember){
             throw "Could not find minecraft player. Weird.";
         }
-        str += `<:yes:1067859611262128210> Kicked on minecraft: ${mcname}\n`;
-        //bot.chat(`/g kick ${mcname} ${reason}`);
+        str += `<:yes:1067859611262128210> Banned on minecraft: ${mcname}\n`;
+        bot.chat(`/g kick ${mcname} ${reason}`);
+        await addbandata(mcname, uuid);
       } else{
         uuid =0;
       }

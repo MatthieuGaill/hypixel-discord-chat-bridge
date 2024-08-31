@@ -12,12 +12,6 @@ module.exports = {
       type: 6,
       required: true,
     },
-    {
-      name: "name",
-      description: "Minecraft Username",
-      type: 3,
-      required: true,
-    },
   ],
 
   execute: async (interaction) => {

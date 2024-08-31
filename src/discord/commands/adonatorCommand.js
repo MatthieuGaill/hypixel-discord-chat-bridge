@@ -83,7 +83,7 @@ module.exports = {
         }
 
         if ( action === "add"){
-            await addDonation(guild, donatorUUID, amount);
+            await addDonation(donatorUUID, amount);
 
             const embed = new EmbedBuilder()
             .setColor(2067276)
@@ -96,7 +96,7 @@ module.exports = {
             await interaction.followUp({embeds: [embed],});
 
         } else {
-            const removeinv = await removeDonation(guild, donatorUUID, amount);
+            const removeinv = await removeDonation(donatorUUID, amount);
             if (removeinv){
                 const embed = new EmbedBuilder()
                 .setColor(15105570)

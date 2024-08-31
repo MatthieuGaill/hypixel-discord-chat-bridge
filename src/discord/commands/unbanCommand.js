@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const { getentry_ban } = require("../../contracts/moderation");
 const config = require("../../../config.json");
+const { removebandata } = require("../../contracts/banlist");
 
 module.exports = {
     name: 'unban',
@@ -52,11 +53,14 @@ module.exports = {
               text: `ID: ${user.id}`,
             });
             await moderation_channel.send({embeds : [modlog]});
+            if (row_unban.uuid !== 0){
+              await removebandata(row_unban.uuid);
+            }
 
             const appealEmbed = new EmbedBuilder()
             .setTitle(`${user.tag} has been unbanned from ⭐ **Golden Legion** ⭐`)
             .setColor("Gold")
-            .setDescription(`Welcome back! ([server link](https://discord.com/invite/FssyYfbkSv))`);
+            .setDescription(`Welcome back! ([server link](https://discord.com/invite/FssyYfbkSv)) and /g join Golden Legion`);
 
             const logs_channel = await interaction.client.channels.fetch("1277735874133757974");
             await logs_channel.send({content: `<@${userId}>`,embeds : [appealEmbed]});

@@ -2,6 +2,7 @@ const Database = require('better-sqlite3');
 const HypixelDiscordChatBridgeError = require("../../contracts/errorHandler.js");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
+const { insertautopost, deleteautopost, getAllautoposts, checkautopost, editautopost } = require('../../contracts/autopost.js');
 
 
 
@@ -96,15 +97,6 @@ module.exports = {
     }
 
     try {
-      const db = new Database('data/autopost.sqlite');
-      db.exec(`CREATE TABLE IF NOT EXISTS autopostdata (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        announcement TEXT,
-        interval INTEGER,
-        duration INTEGER,
-        current INTEGER
-      )`);
-  
       const action = interaction.options.getSubcommand();
       
 
@@ -121,14 +113,9 @@ module.exports = {
           { name: "Interval", value: interval0 !== undefined ? interval0 : "N/A", inline: true },
           { name: "Expiration date", value: date_duration !== undefined ? date_duration : "N/A" },
         ];
-        
-        const isEmpty = isTableEmpty(db);
-        if (isEmpty){
-          db.prepare('INSERT OR REPLACE INTO autopostdata (id, announcement, interval, duration, current) VALUES (?, ?, ?, ?, ?)').run(1, announcement, interval, duration, 0);
-        } else{
-          db.prepare('INSERT OR REPLACE INTO autopostdata (announcement, interval, duration, current) VALUES (?, ?, ?, ?)').run(announcement, interval, duration, 0);
-        }
-        
+
+        await insertautopost(announcement, interval, duration);
+
         const embed = new EmbedBuilder()
         .setColor(2067276)
         .setTitle(`Announcement created`)
@@ -142,7 +129,7 @@ module.exports = {
         
       } else if (action === "remove"){
         const id = interaction.options.getInteger("id");
-        db.prepare('DELETE FROM autopostdata WHERE id = ?').run(id);
+        await deleteautopost(id);
         const embed = new EmbedBuilder()
         .setColor(15105570)
         .setAuthor({ name: "Announcement removed" })
@@ -155,14 +142,26 @@ module.exports = {
   
         
       } else if (action === "list"){
-        const embed = getList(db);
-      
+        const verticalList = await getList();
+        const embed = new EmbedBuilder()
+          .setColor(16777215)
+          .setAuthor({ name: "Current announcements" })
+          .setDescription(verticalList)
+          .setFooter({
+            text: ' ',
+            iconURL: "https://i.imgur.com/Fc2R9Z9.png",
+          });
+    
         await interaction.followUp( {embeds: [embed]});
 
       } else if (action === "edit"){
         const announcement = interaction.options.getString("announcement");
         const id = interaction.options.getInteger("id");
-        db.prepare("UPDATE autopostdata SET announcement = ? WHERE id = ?").run(announcement, id);
+        const check = await checkautopost(id);
+        if (!check){
+          throw "Invalid id";
+        }
+        await editautopost(announcement, id);
         const embed = new EmbedBuilder()
         .setColor(15105570)
         .setAuthor({ name: "Announcement edited" })
@@ -174,9 +173,11 @@ module.exports = {
         await interaction.followUp({embeds: [embed],});
 
       } else if (action === "display"){
-        const announcement = interaction.options.getString("announcement");
         const id = interaction.options.getInteger("id");
-        const row = db.prepare("SELECT announcement FROM autopostdata WHERE id = ?").get(id);
+        const row = await checkautopost(id);
+        if (!row){
+          "Invalid id";
+        }
         const embed = new EmbedBuilder()
         .setColor(16777215)
         .setAuthor({ name: `Announcement of id ${id}` })
@@ -228,8 +229,8 @@ async function convertToTimestamp(time0) {
   return milliseconds;
 }
   
-function getList(db){
-  const rows = db.prepare('SELECT * FROM autopostdata').all();
+async function getList(){
+  const rows = await getAllautoposts();
   const dataDictionary = {};
   rows.forEach((row) => {
     dataDictionary[row.id] = [row.announcement, row.interval, row.duration];
@@ -243,16 +244,7 @@ function getList(db){
     verticalList = "No announcements yet!";
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(16777215)
-    .setAuthor({ name: "Current announcements" })
-    .setDescription(verticalList)
-    .setFooter({
-      text: ' ',
-      iconURL: "https://i.imgur.com/Fc2R9Z9.png",
-  });
-
-  return embed;
+  return verticalList
 }
 
 function truncateString(str) {
@@ -260,9 +252,4 @@ function truncateString(str) {
     return str.slice(0, 16) + "...";
   }
   return str;
-}
-
-function isTableEmpty(db) {
-  const row = db.prepare(`SELECT COUNT(*) AS count FROM autopostdata`).get();
-  return row.count === 0;
 }

@@ -94,6 +94,7 @@
       "moderationLogsChannel": "MODERATION_LOG_CHANNEL_ID",
       "appealChannel": "APPEAL_FORM_CHANNEL_ID",
       "afkChannel": "AFK_CHANNEL_ID",
+      "donationsChannel": "DONATION_CHANNEL_ID",
       "debugMode": true,
       "debugChannel": "DEBUG_CHANNEL_ID",
       

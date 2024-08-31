@@ -6,6 +6,8 @@ const config = require("../../../config.json");
 const Logger = require("../.././Logger.js");
 const { checkAppeal, disableAppeal, selectAppealForm, disableAppealForm } = require("../../contracts/moderation.js");
 const { addAfk } = require("../../contracts/afk.js");
+const { addDonation } = require("../../contracts/donator.js");
+const { selectlink_uuid } = require("../../contracts/verify.js");
 
 
 module.exports = {
@@ -68,7 +70,7 @@ module.exports = {
                     // oldEmbed['data']['footer'] = {text: `ERROR`}
                     const errorEmbed = new EmbedBuilder(oldEmbed)
                     .setTitle("**ERROR**")
-                    .setColor(5763719)
+                    .setColor(15548997)
                     .setFooter({
                         text: "ERROR",
                     })
@@ -76,6 +78,7 @@ module.exports = {
                     await afk_message.edit({embeds: [errorEmbed],components: []});
                     await afk_message.reply(`Uncorrect formatting`);
                     await afk_message.delete();
+                    return;
                 }
                 
                 if (status === "yes"){
@@ -96,9 +99,9 @@ module.exports = {
                     // oldEmbed['data']['footer'] = {text: `Denied at`, iconURL: interaction.user.avatarURL()};
                     // oldEmbed['data']['timestamp'] = new Date().toISOString();
                     const approvedEmbed = new EmbedBuilder(oldEmbed)
-                    .setColor(5548997)
+                    .setColor(15548997)
                     .setFooter({
-                        text: "Approved at",
+                        text: "Rejected at",
                         iconURL: interaction.user.avatarURL(),
                     })
                     .setTimestamp(); 
@@ -106,8 +109,79 @@ module.exports = {
 
                     afk_message.reply(`<@${discordId}> your request was denied! Please read the **pinned** message **carefully** before making a new request.`);
                 }
-            }
-            else if (interaction.customId.startsWith('appform') ){
+            } else if (interaction.customId.startsWith('don')){
+                //VALIDATE DONATION REQUESTS
+                if (isManager(interaction) === false){
+                    throw "No permission";
+                }
+                const regex = /^don(.+)(yes|no)$/;
+                const match = interaction.customId.match(regex);
+                if (!match) {
+                    throw "weird";
+                }
+                const msg_id = match[1]; 
+                const status = match[2];
+                const don_channel = interaction.guild.channels.cache.get(config.discord.channels.donationsChannel);
+                const don_message = await don_channel.messages.fetch(msg_id);
+                const oldEmbed = await don_message.embeds[0];
+                const fields = oldEmbed.fields;
+                let uuid, amount;
+                fields.forEach(field => {
+                    if (field.name === "Username") {
+                        const match2 = field.value.match(/\(([^)]+)\)/);
+                        if (match2) {
+                            uuid = match2[1]; 
+                        }
+                    } else if (field.name === "Amount :dollar:") {
+                        const match3 = field.value.match(/\d+/);
+                        amount = parseInt(match3[0], 10);
+                    }
+                });
+
+                if (!uuid || !amount){
+                    const errorEmbed = new EmbedBuilder(oldEmbed)
+                    .setTitle("**ERROR**")
+                    .setColor(5763719)
+                    .setFooter({
+                        text: "ERROR",
+                    })
+                    .setTimestamp(); // Automatically sets the current date/time
+                    await don_message.edit({embeds: [errorEmbed],components: []});
+                    await don_message.reply(`Uncorrect formatting`);
+                    await don_message.delete();
+                    return;
+                }
+                
+                if (status === "yes"){
+                    await addDonation(uuid, amount);
+                    const approvedEmbed = new EmbedBuilder(oldEmbed)
+                    .setColor(5763719)
+                    .setFooter({
+                        text: "Approved at",
+                        iconURL: interaction.user.avatarURL(),
+                    })
+                    .setTimestamp(); 
+                    await don_message.edit({embeds: [approvedEmbed], components: []});
+                } else{
+                    const deniedEmbed = new EmbedBuilder(oldEmbed)
+                    .setColor(15548997)
+                    .setFooter({
+                        text: "Rejected at",
+                        iconURL: interaction.user.avatarURL(),
+                    })
+                    .setTimestamp(); 
+                    await don_message.edit({embeds: [deniedEmbed],components: []});
+
+                    const d_id = await selectlink_uuid(uuid);
+                    if (d_id){
+                        don_message.reply(`<@${d_id}> your donation request was denied!`);
+                    } else{
+                        don_message.reply(`This donation request was denied!`);
+                    }
+                    
+                }
+            
+            } else if (interaction.customId.startsWith('appform') ){
                 // VALIDATE APPEAL FORMS
                 if (isManager(interaction) === false){
                     throw "No permission";
@@ -177,18 +251,18 @@ module.exports = {
 
                     } else{
                         const embed = new EmbedBuilder()
-                        .setColor("Red")
+                        .setColor(15548997)
                         .setDescription("**Error:** the appeal does not correspond to a mute or a ban ???")
                         await interaction.reply({embeds: [embed], ephemeral: true});
                     }
                 } else{
                     const embed = new EmbedBuilder()
-                    .setColor("Red")
+                    .setColor(15548997)
                     .setDescription("Appeal denied")
                     const deniedEmbed = new EmbedBuilder(oldEmbed)
                         .setColor(15548997)
                         .addFields({name:"Rejected by", value: `<@${interaction.user.id}>`});
-                    await appealform_message.edit({ embeds: [deniedEmbeds], components: [] });
+                    await appealform_message.edit({ embeds: [deniedEmbed], components: [] });
                     await interaction.reply({embeds: [embed], ephemeral: true});
                 }
                 
@@ -256,7 +330,7 @@ module.exports = {
                     await interaction.reply({ content: 'Invalid or expired token', ephemeral: true });
                     return;
                 }
-                const appeal_channel = await client.channels.fetch("1173685532270805052");
+                const appeal_channel = await client.channels.fetch(config.discord.channels.appealChannel);
 
                 const user = interaction.user;
                 if (appealRecord.discordId !== user.id){

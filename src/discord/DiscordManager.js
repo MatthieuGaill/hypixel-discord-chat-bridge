@@ -232,8 +232,8 @@ class DiscordManager extends CommunicationBridge {
     });
   }
 
-  async onBridgeMute({reason, username, duration, modName, modId}){
-    const command = await this.client.commands.get("mute");
+  async onBridgeSanctions({type, reason, username, duration, modName, modId}){
+    
     //const modUser = await this.client.users.fetch(modId).catch(e => null);
     const interaction = {
       options: {
@@ -253,6 +253,12 @@ class DiscordManager extends CommunicationBridge {
         tag: modName
       },
       fromMc: true,
+    }
+    let command;
+    if (type === 0){
+      command = await this.client.commands.get("warn");
+    } else if(type === 1){
+      command = await this.client.commands.get("mute");
     }
     await command.execute(interaction);
   }

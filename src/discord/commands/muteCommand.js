@@ -239,7 +239,7 @@ module.exports = {
     } catch (e){
       console.error(e);
       if (interaction.fromMc){
-        bot.chat(`/oc [ERROR] ${erorr}`);
+        bot.chat(`/oc [ERROR] ${error}`);
       } else{
         const embed = new EmbedBuilder()
           .setColor("Red")

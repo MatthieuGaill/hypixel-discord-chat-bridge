@@ -35,7 +35,7 @@ class StateHandler extends eventHandler {
     if (message.includes("✎ Mana") && message.includes("❤") && message.includes("/")) {
       return;
     }
-    if (message.includes("APPEARING OFFLINE") || message.includes("YOU ARE IN A PREGAME") || message.includes("HYPIXEL.NET") || message.includes("YOU MAY DRIVE")) {
+    if (message.includes("APPEARING OFFLINE") || message.includes("YOU ARE IN A PREGAME") || message.includes("HYPIXEL.NET") || message.includes("YOU MAY DRIVE AROUND")) {
       return;
     }
     // const message1 = message.toLowerCase();
@@ -824,6 +824,36 @@ class StateHandler extends eventHandler {
       if (message.includes("replying to") && username === this.bot.username) {
         return;
       }
+      // if (username.toLowerCase() == "thegreatestowl"){
+      //   console.log(message);
+      //   const openai = new (require('openai')).OpenAI({
+      //     baseURL: "https://api.cow.rip/api/v1", // Or use the `OPENAI_BASE_URL` env var
+      //     apiKey: "sk-quardo-VeQ1gEQe8jn8hrA0NiftbjJY0EWcl2XxAjvol6rDxzUNOL2a" // You can get a key by logging in at https://api.cow.rip/api/v1/oauth/hf
+      //   });
+        
+      //   //(async()=>{
+      //   var completion = await openai.chat.completions.create({
+      //     model: "gpt-4o-mini",
+      //     messages:[
+      //       {
+      //         "role": "user",
+      //         "content": `Correct grammatically this sentence without saying anything else: ${message}`,
+      //       }
+      //     ]
+      //   });
+      //   const corr_msg = completion.choices[0].message.content;
+        
+      //   //console.log(completion.choices[0].message.content)
+      //   if (message.toLowerCase().trim() !== corr_msg.toLowerCase().replace(/[.?,]/g, '')){
+      //     if (chatType.toLowerCase() == "officer"){
+      //       this.send(`/oc ${corr_msg}`);
+      //     } else{
+      //       this.send(`/gc ${corr_msg}`);
+      //     }
+      //   }
+        
+      //   //})()
+      // }
 
       this.minecraft.broadcastMessage({
         fullMessage: colouredMessage,
@@ -1133,14 +1163,15 @@ class StateHandler extends eventHandler {
       if (config.verification.enabled === false) {
         return;
       }
-
+      //console.log(`player: ${player}`);
       const linkedUser = await selectlink_uuid(player);
       if (linkedUser === undefined) {
         return;
       }
+      //console.log(`linked: ${linkedUser}`);
 
       const user = await guild.members.fetch(linkedUser);
-      await updateRolesCommand.execute(null, user);
+      await updateRolesCommand.execute(undefined, user);
     } catch {
       //
     }

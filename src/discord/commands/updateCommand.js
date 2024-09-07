@@ -129,6 +129,7 @@ module.exports = {
             
 
           memberRoles.removeRole(config.verification.guestRole, `Guest role`);
+          memberRoles.removeRole("1057382314545516624", "Verified");
           await UpdateRolesDonation(memberRoles, uuid, true);
         } else {
           // LINKED BUT NOT IN GUILD

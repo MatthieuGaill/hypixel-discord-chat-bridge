@@ -13,21 +13,23 @@ class KittyCommand extends minecraftCommand {
   }
 
   async onCommand(username, message) {
-    // try {
-    //   const { data } = await axios.get(`https://api.thecatapi.com/v1/images/search`);
+    try {
+      const { data } = await axios.get(`https://api.thecatapi.com/v1/images/search`);
 
-    //   if (data === undefined) {
-    //     // eslint-disable-next-line no-throw-literal
-    //     throw "An error occured while fetching the image. Please try again later.";
-    //   }
+      if (data === undefined) {
+        // eslint-disable-next-line no-throw-literal
+        throw "An error occured while fetching the image. Please try again later.";
+      }
 
-    //   const link = data[0].url;
-    //   const upload = await uploadImage(link);
+      const link = data[0].url;
+      const upload = await uploadImage(link);
 
-    //   this.send(`/gc Cute Cat: ${upload.data.link}`);
-    // } catch (error) {
-    //   this.send(`/gc [ERROR] ${error ?? "Something went wrong.."}`);
-    // }
+      //this.send(`/gc Cute Cat: ${upload.data.link}`);
+      imgurUrl = upload.data.link;
+      this.send(`/gc Cute Cat: Check Discord Bridge for image.`);
+    } catch (error) {
+      this.send(`/gc [ERROR] ${error ?? "Something went wrong.."}`);
+    }
   }
 }
 

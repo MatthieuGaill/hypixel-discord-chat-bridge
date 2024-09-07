@@ -20,7 +20,7 @@ async function removelink_discord(discordId) {
 }
 
 async function selectlink_uuid(uuid) {
-    const user = db.prepare('SELECT discordid FROM linked WHERE uuid = ?').get(uuid);
+    const user = db.prepare('SELECT discordId FROM linked WHERE uuid = ?').get(uuid);
     if (user){
         return user.discordId;
     }

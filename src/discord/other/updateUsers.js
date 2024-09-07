@@ -10,7 +10,7 @@ if (config.verification.autoUpdater) {
   //cron.schedule('*/2 * * * *', async () => {
     Logger.discordMessage("Executing RoleSync...");
     await updateafkCommand.execute(null);
-    await updateRolesCommand.execute(null, true); 
+    await updateRolesCommand.execute(undefined, true); 
     Logger.discordMessage("RoleSync successfully executed.");
   });
 }

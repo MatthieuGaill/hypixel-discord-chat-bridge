@@ -50,7 +50,7 @@ module.exports = {
         const amount = parseFloat(interaction.options.getString("amount"))
         let comment = interaction.options.getString("comment");
         const uuid = interaction.options.getString("uuid");
-        console.log(`fromMC: ${interaction.fromMc}`);
+        //console.log(`fromMC: ${interaction.fromMc}`);
         if (interaction.fromMc){
             interaction.client = client;
             interaction.guild = guild;
@@ -114,8 +114,8 @@ module.exports = {
             if (interaction.fromMc){
                 const donateChannel = await guild.channels.fetch(config.discord.channels.donationsChannel);
                 don_msg = await donateChannel.send({embeds: [embed]})
-                console.log(embed);
-                console.log("SEND EMBED");
+                // console.log(embed);
+                // console.log("SEND EMBED");
             }else{
                 don_msg = await interaction.followUp({embeds: [embed]}); 
             }
@@ -135,7 +135,7 @@ module.exports = {
 
 
             const row = new ActionRowBuilder().addComponents(approve, deny);
-            await don_msg.edit({ content: "test", embeds: [embed], components: [row] }).catch(e => console.error(e));
+            await don_msg.edit({ embeds: [embed], components: [row] }).catch(e => console.error(e));
             if (interaction.fromMc){
                 bot.chat('/oc Donation request successfully submitted on discord!');
             }

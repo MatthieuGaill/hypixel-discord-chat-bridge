@@ -4,6 +4,7 @@ const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const { getUsername, resolveUsernameOrUUID } = require("../../contracts/API/PlayerDBAPI.js");
 const { isUuid } =  require("../../../API/utils/uuid.js");
+const { selectlink_uuid } = require("../../contracts/verify.js");
 
 
 
@@ -149,13 +150,18 @@ module.exports = {
         const dataDictionary = await getList();
         const dataDictionary0 = {};
         for (const key in dataDictionary){
+          const d_id = await selectlink_uuid(key);
+          if (d_id){
+            dataDictionary0[`<@${d_id}>`] = dataDictionary[key];
+          } else{
             const key0 = await getUsername(key);
-            dataDictionary0[key0] = dataDictionary[key];
+            dataDictionary0[`\`${key0}\``] = dataDictionary[key];
+          }
         }
         const emojis = [`<:yes:1067859611262128210>`, `<:guildlogo:1045831680608456826>`, `<:verified:859701120015138857>`];
         let verticalList = Object.entries(dataDictionary0)
         .sort(([, a], [, b]) => b.totalInvited - a.totalInvited)
-        .map(([username, datadic]) => `${emojis[0]} \`${username}\` : ${datadic['totalInvited']} ${emojis[1]}  |  ${datadic['invited_discord']} ${emojis[2]}`)
+        .map(([username, datadic]) => `${emojis[0]} ${username} : ${datadic['totalInvited']} ${emojis[1]}  |  ${datadic['verifiedInvited']} ${emojis[2]}`)
         .join('\n');
 
         if (!verticalList) {

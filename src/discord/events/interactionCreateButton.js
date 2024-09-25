@@ -8,6 +8,7 @@ const { checkAppeal, disableAppeal, selectAppealForm, disableAppealForm } = requ
 const { addAfk } = require("../../contracts/afk.js");
 const { addDonation } = require("../../contracts/donator.js");
 const { selectlink_uuid } = require("../../contracts/verify.js");
+const { addCollected } = require("../../contracts/collecteddonations.js");
 
 
 module.exports = {
@@ -162,6 +163,7 @@ module.exports = {
                     })
                     .setTimestamp(); 
                     await don_message.edit({embeds: [approvedEmbed], components: []});
+                    await addCollected(interaction.user.id, amount);
                 } else{
                     const deniedEmbed = new EmbedBuilder(oldEmbed)
                     .setColor(15548997)

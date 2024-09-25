@@ -38,7 +38,7 @@ async function getInvites(inviterUUID, hypixelGuildMembers) {
   const members = user.members ? user.members.split('/') : [];
   const discordmemberslist = []
   let totalInvited = 0;
-  let invited_discord = 0
+  let verifiedInvited = 0;
 
 
   try {
@@ -49,6 +49,7 @@ async function getInvites(inviterUUID, hypixelGuildMembers) {
         totalInvited += 1;
         const d_id = await selectlink_uuid(member);
         if (d_id) {
+          verifiedInvited += 1;
           discordmemberslist.push(member);
         }
       }
@@ -58,8 +59,7 @@ async function getInvites(inviterUUID, hypixelGuildMembers) {
   } catch (error) {
     console.error(error);
   }
-
-  return { totalInvited, invited_discord };
+  return { totalInvited, verifiedInvited };
 }
 
 
@@ -101,7 +101,7 @@ async function removeInvite(inviterUUID, invitedUUID) {
 async function checkdetails(inviterUUID){
   const hypixelGuild = await hypixel.getGuild('name', 'Golden Legion');
   const hypixelGuildMembers = hypixelGuild.members.map(member => member.uuid.replace(/-/g, ''));
-  const user = db.prepare('SELECT members,discord FROM invitedata WHERE uuid = ?').get(inviterUUID);
+  const user = db.prepare('SELECT * FROM invitedata WHERE uuid = ?').get(inviterUUID);
   let guild_list, discord_list = [];
   if (!user) {
     return { guild_list: "", discord_list: ""};

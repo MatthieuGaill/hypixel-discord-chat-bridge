@@ -3,6 +3,7 @@ const updateafkCommand = require("../commands/updateafkCommand.js");
 const config = require("../../../config.json");
 const Logger = require("../../Logger.js");
 const cron = require("node-cron");
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 if (config.verification.autoUpdater) {
   Logger.discordMessage(`RoleSync ready, executing every ${config.verification.autoUpdaterInterval} hours.`);
@@ -10,6 +11,7 @@ if (config.verification.autoUpdater) {
   //cron.schedule('*/2 * * * *', async () => {
     Logger.discordMessage("Executing RoleSync...");
     await updateafkCommand.execute(null);
+    await delay(1000);
     await updateRolesCommand.execute(undefined, true); 
     Logger.discordMessage("RoleSync successfully executed.");
   });

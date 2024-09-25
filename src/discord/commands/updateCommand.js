@@ -34,6 +34,7 @@ module.exports = {
   
       }
       let memberRoles = new MemberRoles([...interaction.member.roles.cache.keys()])
+      console.log(memberRoles.array());
 
 
       const uuid = await selectlink_discord(interaction.user.id);

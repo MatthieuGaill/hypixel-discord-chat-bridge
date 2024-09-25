@@ -30,11 +30,11 @@ class checkinviteCommand extends minecraftCommand {
               usernameUUID = '0';
               throw error;         
            });
-           const guild = client.guilds.cache.get("819229417796534283");
+           //const guild = client.guilds.cache.get("819229417796534283");
            const hypixelGuild = await hypixel.getGuild('name', 'Golden Legion');
            const hypixelGuildMembers = hypixelGuild.members.map(member => member.uuid.replace(/-/g, ''));
-           const dataDictionary = await getInvites(usernameUUID, hypixelGuildMembers, guild);
-           this.send(`/gc Total invites of ${username}: ${dataDictionary['totalInvited']}  (${dataDictionary['invited_discord']} verified)`);
+           const dataDictionary = await getInvites(usernameUUID, hypixelGuildMembers);
+           this.send(`/gc Total invites of ${username}: ${dataDictionary['totalInvited']}  (${dataDictionary['verifiedInvited']} verified)`);
   
 
       } catch (error) {

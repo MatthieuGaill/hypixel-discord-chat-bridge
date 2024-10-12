@@ -94,9 +94,24 @@ function removeRep(member_id, choice, choiceIndex, number) {
   
     } catch (err) {
       throw err;
-    } finally {
-      db.close();
     }
+}
+async function getPlayer_simple(member_id){
+  try {
+    const row = db.prepare('SELECT * FROM repdata WHERE key = ?').get(member_id);
+
+    if (!row) {
+      return undefined;
+    }
+    const typerep = JSON.parse(row.typerep);
+    typerep.push(row.reputation);
+
+    return typerep;
+
+  }  catch (err) {
+    console.error(err.message);
+    throw "ERROR whilst reading data!";
+  }
 }
 
 async function getPlayer(member) {
@@ -148,10 +163,8 @@ async function getPlayer(member) {
   } catch (err) {
     console.error(err.message);
     throw new Error("ERROR whilst reading data!");
-  } finally {
-    db.close();
-  }
+  } 
 }
   
   
-module.exports = { getList, updateDatabase, removeRep, getPlayer};
+module.exports = { getList, updateDatabase, removeRep, getPlayer, getPlayer_simple};
